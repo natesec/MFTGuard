@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    MftFile mft;
+    mft_file mft;
 
     printf(MESSAGE_MARKER "Opening $MFT file...\n");
 

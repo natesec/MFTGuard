@@ -24,10 +24,10 @@ typedef struct
     uint64_t record_size;   /** Size of each record in bytes. */
     uint64_t record_number; /** Index of the current record. */
     uint64_t record_count;  /** Total number of records. */
-} MftFile;
+} mft_file;
 
 /**
- * @brief Represents an NTFS FILE record header.
+ * @brief Represents an NTFS FILE record header in the $MFT.
  */
 typedef struct
 {
@@ -45,7 +45,7 @@ typedef struct
     uint16_t next_attribute_id; /** 0x28 - Incremental identifier. */
     uint16_t alignment;         /** 0x2A - Align or unused. */
     uint32_t record_number;     /** 0x2C - MFT record number. */
-} MFT_RECORD_HEADER;
+} mft_record_header;
 
 /**
  * @brief Represents a parsed MFT record.
@@ -53,8 +53,8 @@ typedef struct
 typedef struct
 {
     uint64_t record_number;   /** Index of the MFT record. */
-    MFT_RECORD_HEADER header; /** Populated MFT record header. */
-} MftRecord;
+    mft_record_header header; /** Populated MFT record header. */
+} mft_record;
 
 /** 
  * @brief Opens a binary $MFT file for reading.
@@ -62,26 +62,26 @@ typedef struct
  * @param path Path to the $MFT file.
  * @return true if the file was opened, false otherwise.
  */
-bool mft_open(MftFile *mft, const char *path);
+bool mft_open(mft_file *mft, const char *path);
 
 /**
  * @brief Reads an MFT record into the buffer.
- * @param mft Pointer to the initialized MftFile.
+ * @param mft Pointer to the initialized mft_file.
  * @return true if a complete record was read, false otherwise.
  */
-bool mft_read_record(MftFile *mft);
+bool mft_read_record(mft_file *mft);
 
 /**
  * @brief Parses an MFT record.
- * @param mft Pointer to an MftFile containing a record in buffer.
+ * @param mft Pointer to an mft_file containing a record in buffer.
  * @return true if the record was parsed and is valid, false otherwise. 
  */
-bool mft_parse_record(const MftFile *mft, MftRecord *record);
+bool mft_parse_record(const mft_file *mft, mft_record *record);
 
 /**
  * @brief Closes the MFT file and frees allocated buffer.
- * @param mft Pointer to an MftFile structure to clean up.
+ * @param mft Pointer to an mft_file structure to clean up.
  */
-void mft_close(MftFile *mft);
+void mft_close(mft_file *mft);
 
 #endif

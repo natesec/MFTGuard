@@ -7,7 +7,7 @@
  * @brief Open file, determine file size, determine and allocate
  *        one record buffer. Initialize state.
  */
-bool mft_open(MftFile *mft, const char *path)
+bool mft_open(mft_file *mft, const char *path)
 {
     if (mft == NULL || path == NULL)
     {
@@ -34,15 +34,15 @@ bool mft_open(MftFile *mft, const char *path)
 /**
  * @brief Read one record, advance record_number.
  */
-bool mft_read_record(MftFile *mft)
+bool mft_read_record(mft_file *mft)
 {
     return true;
 }
 
 /**
- * @brief Interpret current buffer. Populate MftRecord.
+ * @brief Interpret current buffer. Populate mft_record.
  */
-bool mft_parse_record(MftFile *mft, MftRecord *record)
+bool mft_parse_record(mft_file *mft, mft_record *record)
 {
     return true;
 }
@@ -50,7 +50,7 @@ bool mft_parse_record(MftFile *mft, MftRecord *record)
 /**
  * @brief Close fd, free buffer, reset state.
  */
-void mft_close(MftFile *mft)
+void mft_close(mft_file *mft)
 {
     if (mft == NULL)
     {
