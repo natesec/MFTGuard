@@ -32,11 +32,14 @@ bool mft_open(mft_file *mft, const char *path)
     // Move to end of file and get position to determine size
     fseek(mft->fptr, 0, SEEK_END);
 
-    mft->file_size = ftell (mft->fptr);
-    if (mft->file_size == -1L) {
+    long size = ftell (mft->fptr);
+
+    if (size == -1L) {
         perror("ftell failed");
         return false;
     }
+
+    mft->file_size = (uint64_t)size;
 
     return true;
 }
