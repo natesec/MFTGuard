@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
     mft_close(&mft);
 
-    printf("[+] MFT closed successfully.\n");
+    printf("[+] MFT closed successfully\n");
 
     return 0;
 }

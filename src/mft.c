@@ -25,6 +25,16 @@ bool mft_open(mft_file *mft, const char *path)
 
     if (mft->fptr == NULL)
     {
+        perror("fopen failed");
+        return false;
+    }
+
+    // Move to end of file and get position to determine size
+    fseek(mft->fptr, 0, SEEK_END);
+
+    mft->file_size = ftell (mft->fptr);
+    if (mft->file_size == -1L) {
+        perror("ftell failed");
         return false;
     }
 
