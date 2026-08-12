@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
     if (argc == 1)
     {
-        printf(ERROR_MARKER "USAGE: %s <file>\n", argv[0]);
+        fprintf(stderr, ERROR_MARKER "USAGE: %s <file>\n", argv[0]);
         return 1;
     }
 
@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
     if (!mft_open(&mft, argv[1]))
     {
-        printf(ERROR_MARKER "FAILED OPENING $MFT FILE.\n");
+        fprintf(stderr, ERROR_MARKER "Failed opening $MFT file");
         return 1;
     }
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
     mft_close(&mft);
 
-    printf("[+] MFT closed successfully\n");
+    printf(SUCCESS_MARKER "MFT closed successfully\n");
 
     return 0;
 }

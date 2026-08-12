@@ -9,6 +9,11 @@
 static bool mft_get_file_size(mft_file *mft);
 
 /**
+ * @brief Get the allocated size field from the MFT record header
+ */
+static bool mft_get_record_size(mft_file *mft);
+
+/**
  * @brief Open file, determine file size, determine and allocate
  *        one record buffer. Initialize state.
  */
@@ -22,7 +27,7 @@ bool mft_open(mft_file *mft, const char *path)
     mft->fptr = NULL;
     mft->buffer = NULL;
     mft->file_size = 0;
-    mft->record_size = MFT_RECORD_SIZE;
+    mft->record_size = MFT_DEFAULT_RECORD_SIZE;
     mft->record_number = 0;
     mft->record_count=0;
 
@@ -30,11 +35,12 @@ bool mft_open(mft_file *mft, const char *path)
 
     if (mft->fptr == NULL)
     {
-        perror("fopen failed");
+        perror("fopen failed\n");
         return false;
     }
 
-    if (!mft_get_file_size(mft)) {
+    if (!mft_get_file_size(mft))
+    {
         return false;
     }
 
@@ -42,7 +48,7 @@ bool mft_open(mft_file *mft, const char *path)
 }
 
 /**
- * @brief Read one record, advance record_number.
+ * @brief Read the record that mft.record_number points to.
  */
 bool mft_read_record(mft_file *mft)
 {
@@ -92,12 +98,18 @@ static bool mft_get_file_size(mft_file *mft)
 
     long size = ftell (mft->fptr);
 
-    if (size == -1L) {
+    if (size == -1L)
+    {
         perror("ftell failed");
         return false;
     }
 
     mft->file_size = (uint64_t)size;
 
+    return true;
+}
+
+static bool mft_get_record_size(mft_file *mft)
+{
     return true;
 }
