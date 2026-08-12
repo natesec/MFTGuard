@@ -4,6 +4,11 @@
 #include <stdlib.h>
 
 /**
+ * @brief Calculate file size of the $MFT file.
+ */
+static bool mft_get_file_size(mft_file *mft);
+
+/**
  * @brief Open file, determine file size, determine and allocate
  *        one record buffer. Initialize state.
  */
@@ -29,17 +34,9 @@ bool mft_open(mft_file *mft, const char *path)
         return false;
     }
 
-    // Move to end of file and get position to determine size
-    fseek(mft->fptr, 0, SEEK_END);
-
-    long size = ftell (mft->fptr);
-
-    if (size == -1L) {
-        perror("ftell failed");
+    if (!mft_get_file_size(mft)) {
         return false;
     }
-
-    mft->file_size = (uint64_t)size;
 
     return true;
 }
@@ -86,4 +83,21 @@ void mft_close(mft_file *mft)
     mft->record_size = 0;
     mft->record_number = 0;
     mft->record_count = 0;
+}
+
+static bool mft_get_file_size(mft_file *mft)
+{
+    // Move to end of file and get position to determine size
+    fseek(mft->fptr, 0, SEEK_END);
+
+    long size = ftell (mft->fptr);
+
+    if (size == -1L) {
+        perror("ftell failed");
+        return false;
+    }
+
+    mft->file_size = (uint64_t)size;
+
+    return true;
 }
