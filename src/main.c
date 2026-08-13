@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
     if (!mft_open(&mft, argv[1]))
     {
-        fprintf(stderr, ERROR_MARKER "Failed opening $MFT file");
+        fprintf(stderr, ERROR_MARKER "failed opening $MFT file");
         return 1;
     }
 
