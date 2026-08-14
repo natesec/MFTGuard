@@ -9,12 +9,12 @@
 #define SUCCESS_MARKER "[+] "
 #define MESSAGE_MARKER "[*] "
 
+#define MFT_DEFAULT_RECORD_SIZE 1024
+#define MFT_RECORD_HEADER_SIZE 0x30
 #define MFT_RECORD_ALLOCATED_SIZE_OFFSET 0x1C
 #define MFT_RECORD_ALLOCATED_SIZE_END    0x20
-#define MFT_RECORD_HEADER_SIZE 0x30
 
-#define MFT_DEFAULT_RECORD_SIZE 1024
-#define MFT_SIGNATURE_FILE "FILE" // 0x454C4946
+#define MFT_SIGNATURE_FILE "FILE"  // 0x454C4946
 #define MFT_SIGNATURE_BAAD  "BAAD" //0x44414142
 
 /**
@@ -62,7 +62,7 @@ typedef struct
 
 /** 
  * @brief Opens a binary $MFT file for reading.
- * @param mft Pointer to the MftFile structure to initialize.
+ * @param mft Pointer to the mft_File structure to initialize.
  * @param path Path to the $MFT file.
  * @return true if the file was opened, false otherwise.
  */
@@ -70,21 +70,21 @@ bool mft_open(mft_file *mft, const char *path);
 
 /**
  * @brief Reads an MFT record into the buffer.
- * @param mft Pointer to the initialized mft_file.
+ * @param mft Pointer to the declared mft_file structure.
  * @return true if a complete record was read, false otherwise.
  */
 bool mft_read_record(mft_file *mft);
 
 /**
  * @brief Parses an MFT record.
- * @param mft Pointer to an mft_file containing a record in buffer.
+ * @param mft Pointer to an mft_file structure containing a record in mft->buffer.
  * @return true if the record was parsed and is valid, false otherwise. 
  */
 bool mft_parse_record(const mft_file *mft, mft_record *record);
 
 /**
  * @brief Closes the MFT file and frees allocated buffer.
- * @param mft Pointer to an mft_file structure to clean up.
+ * @param mft Pointer to a declared mft_file structure to clean up.
  */
 void mft_close(mft_file *mft);
 
