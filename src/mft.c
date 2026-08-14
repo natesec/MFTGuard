@@ -19,6 +19,14 @@ static bool mft_get_file_size(mft_file *mft);
 static bool mft_get_record_size(mft_file *mft);
 
 /**
+ * @brief Validate the record size obtained from the allocated
+ *        size field of the MFT record header.
+ * @param mft Pointer to the declared mft_file structure.
+ * @return true if record size is correct, false otherwise.
+ */
+static bool mft_validate_record_size(const mft_file *mft);
+
+/**
  * Open file, determine file size, determine and allocate
  * one record buffer. Initialize state.
  */
@@ -51,6 +59,11 @@ bool mft_open(mft_file *mft, const char *path)
     }
 
     if (!mft_get_record_size(mft))
+    {
+        return false;
+    }
+
+    if (!mft_validate_record_size(mft))
     {
         return false;
     }
@@ -167,6 +180,7 @@ static bool mft_get_record_size(mft_file *mft)
 
     if (memcmp(header, MFT_SIGNATURE_BAAD, 4) == 0)
     {
+        /** TODO: add feature to make note of corrupt record and then skip */
         fprintf(stderr, ERROR_MARKER "mft record signature is BAAD");
         return false;
     }
@@ -192,5 +206,44 @@ static bool mft_get_record_size(mft_file *mft)
 
     mft->record_size = allocated_size;
     
+    return true;
+}
+
+static bool mft_validate_record_size(const mft_file *mft)
+{
+    if (mft == NULL)
+    {
+        fprintf(stderr, ERROR_MARKER "failed to validate record size");
+        return false;
+    }
+
+    if (mft->record_size == 0)
+    {
+        fprintf(stderr, ERROR_MARKER "invalid record size of 0");
+        return false;
+    }
+
+    if (mft->record_size != MFT_DEFAULT_RECORD_SIZE)
+    {
+        fprintf(
+            stderr,
+            ERROR_MARKER "non-standard record size %llu",
+            (unsigned long long)(mft->record_size)
+        );
+        return false;
+    }
+
+    if (mft->record_size > mft->file_size)
+    {
+        fprintf(stderr, ERROR_MARKER "record size exceeds file size");
+        return false;
+    }
+
+    if (mft->file_size % mft->record_size != 0)
+    {
+        fprintf(stderr, ERROR_MARKER "file size is not evenly divisible by record size");
+        return false;
+    }
+
     return true;
 }
