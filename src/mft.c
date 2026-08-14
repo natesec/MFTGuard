@@ -75,6 +75,42 @@ bool mft_open(mft_file *mft, const char *path)
  */
 bool mft_read_record(mft_file *mft)
 {
+    if (mft == NULL || mft->fptr == NULL || mft->buffer == NULL)
+    {
+        fprintf(stderr, ERROR_MARKER "failed to read record\n");
+        return false;
+    }
+
+    if (mft->record_number > mft->record_count)
+    {
+        fprintf(stderr, ERROR_MARKER "record number out of range\n");
+        return false;
+    }
+
+    uint64_t offset = mft->record_number * mft->record_size;
+
+    if (_fseeki64(mft->fptr, offset, SEEK_SET) != 0)
+    {
+        perror("_fseeki64 failed");
+        return false;
+    }
+
+    size_t record_bytes_read = fread(mft->buffer, 1, (size_t)mft->record_size, mft->fptr);
+
+    if (record_bytes_read != (size_t)mft->record_size)
+    {
+        if (ferror(mft->fptr))
+        {
+            perror("fread failed");
+        }
+        else
+        {
+            fprintf(stderr, ERROR_MARKER "failed to read record bytes");
+        }
+
+        return false;
+    }
+
     return true;
 }
 

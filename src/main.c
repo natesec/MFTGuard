@@ -23,6 +23,20 @@ int main(int argc, char *argv[])
     printf(MESSAGE_MARKER "Record size: %llu bytes\n", (unsigned long long)mft.record_size);
     printf(MESSAGE_MARKER "Record count: %llu\n", (unsigned long long)mft.record_count);
 
+    if (!mft_read_record(&mft))
+    {
+        mft_close(&mft);
+        return 1;
+    }
+
+    printf(
+        MESSAGE_MARKER "Signature: %02X %02X %02X %02X\n",
+        mft.buffer[0], // 46
+        mft.buffer[1], // 49
+        mft.buffer[2], // 4C
+        mft.buffer[3]  // 45
+        );
+
     mft_close(&mft);
 
     printf(SUCCESS_MARKER "MFT closed successfully\n");
