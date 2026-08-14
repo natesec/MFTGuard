@@ -69,7 +69,7 @@ typedef struct
 bool mft_open(mft_file *mft, const char *path);
 
 /**
- * @brief Reads an MFT record into the buffer.
+ * @brief Reads the current MFT record into the buffer.
  * @param mft Pointer to the declared mft_file structure.
  * @return true if a complete record was read, false otherwise.
  */

@@ -20,9 +20,7 @@ int main(int argc, char *argv[])
     }
 
     printf(MESSAGE_MARKER "File size: %llu bytes\n", (unsigned long long)mft.file_size);
-
     printf(MESSAGE_MARKER "Record size: %llu bytes\n", (unsigned long long)mft.record_size);
-
     printf(MESSAGE_MARKER "Record count: %llu\n", (unsigned long long)mft.record_count);
 
     mft_close(&mft);

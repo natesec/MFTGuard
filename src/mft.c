@@ -34,7 +34,7 @@ bool mft_open(mft_file *mft, const char *path)
 {
     if (mft == NULL || path == NULL)
     {
-        fprintf(stderr, ERROR_MARKER "failed to open file");
+        fprintf(stderr, ERROR_MARKER "failed to open file\n");
         return false;
     }
 
@@ -49,7 +49,7 @@ bool mft_open(mft_file *mft, const char *path)
 
     if (mft->fptr == NULL)
     {
-        perror("fopen failed\n");
+        perror("fopen failed");
         return false;
     }
 
@@ -71,7 +71,7 @@ bool mft_open(mft_file *mft, const char *path)
 }
 
 /**
- * Read the current record.
+ * Read the current record into the buffer.
  */
 bool mft_read_record(mft_file *mft)
 {
@@ -143,7 +143,7 @@ static bool mft_get_record_size(mft_file *mft)
 {
     if (mft == NULL || mft->fptr == NULL)
     {
-        fprintf(stderr, ERROR_MARKER "failed to get record size");
+        fprintf(stderr, ERROR_MARKER "failed to get record size\n");
         return false;
     }
 
@@ -171,7 +171,7 @@ static bool mft_get_record_size(mft_file *mft)
         }
         else
         {
-            fprintf(stderr, ERROR_MARKER "failed to read MFT record header");
+            fprintf(stderr, ERROR_MARKER "failed to read MFT record header\n");
         }
 
         return false;
@@ -180,12 +180,12 @@ static bool mft_get_record_size(mft_file *mft)
     if (memcmp(header, MFT_SIGNATURE_BAAD, 4) == 0)
     {
         /** TODO: add feature to make note of corrupt record and then skip */
-        fprintf(stderr, ERROR_MARKER "mft record signature is BAAD");
+        fprintf(stderr, ERROR_MARKER "mft record signature is BAAD\n");
         return false;
     }
     else if (memcmp(header, MFT_SIGNATURE_FILE, 4) != 0)
     {
-        fprintf(stderr, ERROR_MARKER "unrecognized/invalid MFT record signature");
+        fprintf(stderr, ERROR_MARKER "unrecognized/invalid MFT record signature\n");
         return false;
     }
 
@@ -199,7 +199,7 @@ static bool mft_get_record_size(mft_file *mft)
 
     if (allocated_size == 0)
     {
-        fprintf(stderr, ERROR_MARKER "allocated size field is zero in record header");
+        fprintf(stderr, ERROR_MARKER "allocated size field is zero in record header\n");
         return false;
     }
 
@@ -212,13 +212,13 @@ static bool mft_validate_record_size(const mft_file *mft)
 {
     if (mft == NULL)
     {
-        fprintf(stderr, ERROR_MARKER "failed to validate record size");
+        fprintf(stderr, ERROR_MARKER "failed to validate record size\n");
         return false;
     }
 
     if (mft->record_size == 0)
     {
-        fprintf(stderr, ERROR_MARKER "invalid record size of 0");
+        fprintf(stderr, ERROR_MARKER "invalid record size of 0\n");
         return false;
     }
 
@@ -226,7 +226,7 @@ static bool mft_validate_record_size(const mft_file *mft)
     {
         fprintf(
             stderr,
-            ERROR_MARKER "non-standard record size %llu",
+            ERROR_MARKER "non-standard record size %llu\n",
             (unsigned long long)(mft->record_size)
         );
         return false;
@@ -234,13 +234,13 @@ static bool mft_validate_record_size(const mft_file *mft)
 
     if (mft->record_size > mft->file_size)
     {
-        fprintf(stderr, ERROR_MARKER "record size exceeds file size");
+        fprintf(stderr, ERROR_MARKER "record size exceeds file size\n");
         return false;
     }
 
     if (mft->file_size % mft->record_size != 0)
     {
-        fprintf(stderr, ERROR_MARKER "file size is not evenly divisible by record size");
+        fprintf(stderr, ERROR_MARKER "file size is not evenly divisible by record size\n");
         return false;
     }
 
