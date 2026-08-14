@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "mft.h"
+#include "utils.h"
 
 int main(int argc, char *argv[])
 {
@@ -36,6 +37,9 @@ int main(int argc, char *argv[])
         mft.buffer[2], // 4C
         mft.buffer[3]  // 45
         );
+    
+    uint32_t be_signature = read_u32_le(mft.buffer);
+    printf(MESSAGE_MARKER "Signature in big-endian: %08X\n", be_signature);
 
     mft_close(&mft);
 

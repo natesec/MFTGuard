@@ -10,6 +10,11 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 add_executable(MFTGuard
     src/main.c
     src/mft.c
+    src/attributes.c
+    src/timestamps.c
+    src/rules.c
+    src/report.c
+    src/utils.c
     third_party/cjson/cJSON.c
 )
 
