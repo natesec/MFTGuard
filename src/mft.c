@@ -53,18 +53,17 @@ bool mft_open(mft_file *mft, const char *path)
         return false;
     }
 
-    if (!mft_get_file_size(mft))
+    if (!mft_get_file_size(mft) || !mft_get_record_size(mft) || !mft_validate_record_size(mft))
     {
         return false;
     }
 
-    if (!mft_get_record_size(mft))
-    {
-        return false;
-    }
+    mft->record_count = mft->file_size / mft->record_size;
 
-    if (!mft_validate_record_size(mft))
+    mft->buffer = malloc(mft->record_size);
+    if (mft->buffer == NULL)
     {
+        perror("malloc failed");
         return false;
     }
 
