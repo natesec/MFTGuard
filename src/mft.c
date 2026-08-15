@@ -1,11 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "mft.h"
 
 /** Little-endian conversion */
 #include "utils.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /**
  * @brief Calculate file size of the $MFT file.
@@ -122,6 +122,37 @@ bool mft_read_record(mft_file *mft)
  */
 bool mft_parse_record(const mft_file *mft, mft_record *record)
 {
+    if (mft == NULL || record == NULL || mft->buffer == NULL)
+    {
+        fprintf(stderr, ERROR_MARKER "failed to parse MFT record\n");
+        return false;
+    }
+
+    // Size of the record header = 0x30 / 48 bytes.
+    if (mft->record_size < 0x30)
+    {
+        fprintf(stderr, ERROR_MARKER "record is too small\n");
+        return false;
+    }
+
+    memcpy(record->header.signature, mft->buffer + 0x0, 4);
+
+    record->header.usa_offset = read_u16_le(mft->buffer + 0x04);
+    record->header.usa_count = read_u16_le(mft->buffer + 0x06);
+    record->header.lsn = read_u64_le(mft->buffer + 0x08);
+    record->header.sequence_number = read_u16_le(mft->buffer + 0x10);
+    record->header.hard_link_count = read_u16_le(mft->buffer + 0x12);
+    record->header.attribute_offset = read_u16_le(mft->buffer + 0x14);
+    record->header.flags = read_u16_le(mft->buffer + 0x16);
+    record->header.used_size = read_u32_le(mft->buffer + 0x18);
+    record->header.allocated_size = read_u32_le(mft->buffer + 0x1C);
+    record->header.base_record = read_u64_le(mft->buffer + 0x20);
+    record->header.next_attribute_id = read_u16_le(mft->buffer + 0x28);
+    record->header.alignment = read_u16_le(mft->buffer + 0x2A);
+    record->header.record_number = read_u32_le(mft->buffer + 0x2C);
+
+    record->record_number = mft->record_number;
+
     return true;
 }
 

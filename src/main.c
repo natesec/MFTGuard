@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     }
 
     mft_file mft;
+    mft_record record;
 
     printf(MESSAGE_MARKER "Opening $MFT file...\n");
 
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    printf("\n\n");
     printf(MESSAGE_MARKER "File size: %llu bytes\n", (unsigned long long)mft.file_size);
     printf(MESSAGE_MARKER "Record size: %llu bytes\n", (unsigned long long)mft.record_size);
     printf(MESSAGE_MARKER "Record count: %llu\n", (unsigned long long)mft.record_count);
@@ -30,6 +32,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    printf("\n\n");
     printf(
         MESSAGE_MARKER "Signature: %02X %02X %02X %02X\n",
         mft.buffer[0], // 46
@@ -41,8 +44,21 @@ int main(int argc, char *argv[])
     uint32_t be_signature = read_u32_le(mft.buffer);
     printf(MESSAGE_MARKER "Signature in big-endian: %08X\n", be_signature);
 
+    if (!mft_parse_record(&mft, &record))
+    {
+        mft_close(&mft);
+        return 1;
+    }
+
+    printf("\n\n");
+    printf(MESSAGE_MARKER "Record number: %llu\n", (unsigned long long)record.record_number);
+    printf(MESSAGE_MARKER "Record header number: %u\n", record.header.record_number);
+    printf(MESSAGE_MARKER "Used size: %u\n", record.header.used_size);
+    printf(MESSAGE_MARKER "Allocated size: %u\n", record.header.allocated_size);
+
     mft_close(&mft);
 
+    printf("\n\n");
     printf(SUCCESS_MARKER "MFT closed successfully\n");
 
     return 0;
