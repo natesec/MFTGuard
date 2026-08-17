@@ -80,7 +80,7 @@ bool mft_read_record(mft_file *mft);
  * @param mft Pointer to an mft_file structure containing a record in mft->buffer.
  * @return true if the record was parsed and is valid, false otherwise. 
  */
-bool mft_parse_record(const mft_file *mft, mft_record *record);
+bool mft_parse_record(mft_file *mft, mft_record *record);
 
 /**
  * @brief Closes the MFT file and frees allocated buffer.

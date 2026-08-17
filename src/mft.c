@@ -128,7 +128,7 @@ bool mft_read_record(mft_file *mft)
 /**
  * Interpret current buffer. Populate mft_record.
  */
-bool mft_parse_record(const mft_file *mft, mft_record *record)
+bool mft_parse_record(mft_file *mft, mft_record *record)
 {
     if (mft == NULL || record == NULL || mft->buffer == NULL)
     {
@@ -162,6 +162,10 @@ bool mft_parse_record(const mft_file *mft, mft_record *record)
     record->record_number = mft->record_number;
 
     /** TODO: apply/validate fixups, walk attributes, timestamp analysis */
+    if (!mft_validate_record_header(mft, record))
+    {
+        return false;
+    }
 
     return true;
 }
