@@ -30,6 +30,14 @@ static bool mft_get_record_size(mft_file *mft);
 static bool mft_validate_record_size(const mft_file *mft);
 
 /**
+ * @brief Validate the record header fields to ensure the record
+ *        is viable for parsing.
+ * @param mft Pointer to the declared mft_file structure.
+ * @param true if the record header is valid, false otherwise.
+ */
+static bool mft_validate_record_header(const mft_file *mft, const mft_record *record);
+
+/**
  * Open file, determine file size, determine and allocate
  * one record buffer. Initialize state.
  */
@@ -152,6 +160,8 @@ bool mft_parse_record(const mft_file *mft, mft_record *record)
     record->header.record_number = read_u32_le(mft->buffer + 0x2C);
 
     record->record_number = mft->record_number;
+
+    /** TODO: apply/validate fixups, walk attributes, timestamp analysis */
 
     return true;
 }
@@ -311,6 +321,48 @@ static bool mft_validate_record_size(const mft_file *mft)
     if (mft->file_size % mft->record_size != 0)
     {
         fprintf(stderr, ERROR_MARKER "file size is not evenly divisible by record size\n");
+        return false;
+    }
+
+    return true;
+}
+
+/** 
+ * USA offset, attribute offset within record, USA count within bounds, used size
+ * does not exceed allocated size or record size, record header < record size
+ */
+static bool mft_validate_record_header(const mft_file *mft, const mft_record *record)
+{
+    // consider moving signature checks here
+    const mft_record_header *header = &record->header;
+
+    if (header->usa_offset >= mft->record_size)
+    {
+        fprintf(stderr, ERROR_MARKER "invalid record header: usa offset > record size");
+        return false;
+    }
+
+    if (header->usa_count == 0)
+    {
+        fprintf(stderr, ERROR_MARKER "invalid record header: usa count = 0");
+        return false;
+    }
+
+    if (header->attribute_offset >= mft->record_size)
+    {
+        fprintf(stderr, ERROR_MARKER "invalid record header: attr offset > record size");
+        return false;
+    }
+
+    if (header->used_size > header->allocated_size)
+    {
+        fprintf(stderr, ERROR_MARKER "invalid record header: used size > allocated size");
+        return false;
+    }
+
+    if (header->used_size > mft->record_size)
+    {
+        fprintf(stderr, ERROR_MARKER "invalid record header: used size > record size");
         return false;
     }
 
