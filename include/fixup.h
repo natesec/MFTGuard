@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define ERROR_MARKER "[!] "
+
 /**
  * @brief Applies USA fixups to a record.
  * @param record Pointer to the record to apply the fixups to.
