@@ -44,7 +44,8 @@ int main(int argc, char *argv[])
     uint32_t be_signature = read_u32_le(mft.buffer);
     printf(MESSAGE_MARKER "Signature in big-endian: %08X\n", be_signature);
 
-    if (!mft_parse_record(&mft, &record))
+    /** TODO: setup cli arguments for sector size */
+    if (!mft_parse_record(&mft, &record, 512))
     {
         mft_close(&mft);
         return 1;
@@ -55,6 +56,9 @@ int main(int argc, char *argv[])
     printf(MESSAGE_MARKER "Record header number: %u\n", record.header.record_number);
     printf(MESSAGE_MARKER "Used size: %u\n", record.header.used_size);
     printf(MESSAGE_MARKER "Allocated size: %u\n", record.header.allocated_size);
+    printf(MESSAGE_MARKER "USA offset: %u\n", record.header.usa_offset);
+    printf(MESSAGE_MARKER "USA count: %u\n", record.header.usa_count);
+    printf(MESSAGE_MARKER "Attribute offset: %u\n", record.header.attribute_offset);
 
     mft_close(&mft);
 

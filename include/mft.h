@@ -78,9 +78,11 @@ bool mft_read_record(mft_file *mft);
 /**
  * @brief Parses an MFT record.
  * @param mft Pointer to an mft_file structure containing a record in mft->buffer.
+ * @param record Pointer to the current record ready for parsing.
+ * @param sector_size Size of the disk sectors (declared in $Boot).
  * @return true if the record was parsed and is valid, false otherwise. 
  */
-bool mft_parse_record(mft_file *mft, mft_record *record);
+bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size);
 
 /**
  * @brief Closes the MFT file and frees allocated buffer.

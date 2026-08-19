@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "mft.h"
-
+#include "fixup.h"
 /** Little-endian conversion */
 #include "utils.h"
 
@@ -128,7 +128,7 @@ bool mft_read_record(mft_file *mft)
 /**
  * Interpret current buffer. Populate mft_record.
  */
-bool mft_parse_record(mft_file *mft, mft_record *record)
+bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
 {
     if (mft == NULL || record == NULL || mft->buffer == NULL)
     {
@@ -164,6 +164,17 @@ bool mft_parse_record(mft_file *mft, mft_record *record)
     /** TODO: apply/validate fixups, walk attributes, timestamp analysis */
     if (!mft_validate_record_header(mft, record))
     {
+        return false;
+    }
+
+    if (!fixup_apply(
+        mft->buffer,
+        (uint32_t)mft->record_size,
+        sector_size,
+        record->header.usa_offset,
+        record->header.usa_count))
+    {
+        /** TODO: Store record number for report if USN mismatches (use enum in fixup.c/h) */
         return false;
     }
 
