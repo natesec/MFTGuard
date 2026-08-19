@@ -55,5 +55,33 @@ bool fixup_apply(
         return false;
     }
 
+    // USA[0] = USN
+    const uint8_t *usa = record + usa_offset;
+    uint16_t usn = read_u16_le(usa);
+
+    // Process each sector end
+    for (uint32_t i = 0; i< sector_count; i++)
+    {
+        uint32_t sector_end = ((i+1) * sector_size) - sizeof(uint16_t);
+
+        uint16_t sector_usn = read_u16_le(record + sector_end);
+
+        // Final WORD of sector must = USN
+        if (sector_usn != usn)
+        {
+            fprintf(stderr, ERROR_MARKER "fixup failed: USN mismatch");
+            return false;
+        }
+
+        // USA[i + 1] = original WORD
+        uint16_t replacement = read_u16_le(
+            usa + ((i+1) * sizeof(uint16_t))
+        );
+
+        // Restore original bytes in order of little-endian
+        record[sector_end] = (uint8_t)(replacement & 0xFF);
+        record[sector_end + 1] = (uint8_t)(replacement >> 8);
+    }
+
     return true;
 }
