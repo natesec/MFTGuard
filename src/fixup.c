@@ -3,6 +3,8 @@
 #include "fixup.h"
 #include "utils.h"
 
+#define ERROR_MARKER "[!] "
+
 bool fixup_apply(
     uint8_t *record, 
     uint32_t record_size, 

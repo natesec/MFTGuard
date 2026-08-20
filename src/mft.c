@@ -4,6 +4,7 @@
 
 #include "mft.h"
 #include "fixup.h"
+#include "attributes.h"
 /** Little-endian conversion */
 #include "utils.h"
 
@@ -175,6 +176,14 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
         record->header.usa_count))
     {
         /** TODO: Store record number for report if USN mismatches (use enum in fixup.c/h) */
+        return false;
+    }
+
+    if (!attributes_walk(
+        mft->buffer,
+        (uint32_t)mft->record_size,
+        record->header.attribute_offset))
+    {
         return false;
     }
 
