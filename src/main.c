@@ -4,9 +4,9 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc == 1)
+    if (argc < 3)
     {
-        fprintf(stderr, ERROR_MARKER "USAGE: %s <file>\n", argv[0]);
+        fprintf(stderr, ERROR_MARKER "USAGE: %s <file> <sector_size>\n", argv[0]);
         return 1;
     }
 
@@ -15,7 +15,27 @@ int main(int argc, char *argv[])
 
     printf(MESSAGE_MARKER "Opening $MFT file...\n");
 
-    if (!mft_open(&mft, argv[1]))
+    const char *mft_path = argv[1];
+
+    char *endptr = NULL;
+    
+    unsigned long sector_size_value = strtoul(argv[2], &endptr, 10);
+
+    if (*argv[2] == '\0' || *endptr != '\0' || sector_size_value > UINT32_MAX)
+    {
+        fprintf(stderr, ERROR_MARKER "invalid sector size\n");
+        return 1;
+    }
+
+    uint32_t sector_size = (uint32_t)sector_size_value;
+
+    if (sector_size == 0)
+    {
+        fprintf(stderr, ERROR_MARKER "sector size cannot be zero");
+        return 1;
+    }
+
+    if (!mft_open(&mft, mft_path))
     {
         fprintf(stderr, ERROR_MARKER "failed opening $MFT file");
         return 1;
@@ -44,8 +64,7 @@ int main(int argc, char *argv[])
     uint32_t be_signature = read_u32_le(mft.buffer);
     printf(MESSAGE_MARKER "Signature in big-endian: %08X\n", be_signature);
 
-    /** TODO: setup cli arguments for sector size */
-    if (!mft_parse_record(&mft, &record, 512))
+    if (!mft_parse_record(&mft, &record, sector_size))
     {
         mft_close(&mft);
         return 1;
