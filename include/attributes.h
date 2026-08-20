@@ -8,6 +8,20 @@
 #define ATTRIBUTE_TYPE_END 0xFFFFFFFF
 
 /**
+ * @brief Represents an MFT record attribute header.
+ */
+typedef struct
+{
+    uint32_t type;         /** 0x00 */
+    uint32_t length;       /** 0x04 */
+    uint8_t non_resident;  /** 0x08 */
+    uint8_t name_length;   /** 0x09 */
+    uint16_t name_offset;  /** 0x0A */
+    uint16_t flags;        /** 0x0C */
+    uint16_t attribute_id; /** 0x0E */
+} attribute_header;
+
+/**
  * @brief Walks the attributes for a given MFT record.
  * @param record Pointer to the record with attributes to walk.
  * @param record_size Size of the record in bytes.
