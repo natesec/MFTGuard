@@ -11,6 +11,15 @@
 
 #define ATTRIBUTE_DEFAULT_HEADER_SIZE 0x10 /** 16 bytes */
 
+/**
+ * @brief Parses the attributes of a header and populates the attribute_header
+ *        struct, used to store common attribute header fields.
+ * @param buffer Pointer, contains attribute header in a given record.
+ * @param header Pointer to an attribute header structure to store common fields.
+ * @return true if the attribute header was parsed, false otherwise.
+ */
+static bool attribute_parse_header(const uint8_t *buffer, attribute_header *header);
+
 bool attributes_walk(
     const uint8_t *record,
     uint32_t record_size,
@@ -29,6 +38,8 @@ bool attributes_walk(
     }
 
     uint32_t offset = attribute_offset;
+
+    attribute_header header;
 
     while (offset < record_size)
     {
@@ -59,9 +70,34 @@ bool attributes_walk(
             return false;
         }
 
+        if (!attribute_parse_header(record + offset, &header))
+        {
+            return false;
+        }
+
         offset += attribute_length;
     }
 
     fprintf(stderr, ERROR_MARKER "attribute walk failed: end marker not found\n");
     return false;
+}
+
+static bool attribute_parse_header(
+    const uint8_t *buffer, attribute_header *header)
+{
+    if (buffer == NULL || header == NULL)
+    {
+        fprintf(stderr, ERROR_MARKER "failed to parse attribute header\n");
+        return false;
+    }
+
+    header->type = read_u32_le(buffer + 0x00);
+    header->length = read_u32_le(buffer + 0x04);
+    header->non_resident = buffer[0x08];
+    header->name_length = buffer[0x09];
+    header->name_offset = read_u16_le(buffer + 0x0A);
+    header->flags = read_u16_le(buffer + 0x0C);
+    header->attribute_id = read_u16_le(buffer + 0x0E);
+
+    return true;
 }
