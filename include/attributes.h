@@ -7,6 +7,11 @@
 /** NTFS attribute type that marks the end of the attribute list. */
 #define ATTRIBUTE_TYPE_END 0xFFFFFFFF
 
+#define ATTRIBUTE_TYPE_STANDARD_INFORMATION 0x10
+#define ATTRIBUTE_TYPE_FILE_NAME 0x30
+#define ATTRIBUTE_TYPE_DATA 0x80
+#define ATTRIBUTE_TYPE_BITMAP 0xB0
+
 /**
  * @brief Represents an MFT record attribute header.
  */

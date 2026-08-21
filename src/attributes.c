@@ -4,6 +4,7 @@
 #include "utils.h"
 
 #define ERROR_MARKER "[!] "
+#define MESSAGE_MARKER "[*] "
 
 /** First 2 attribute header fields*/
 #define ATTRIBUTE_TYPE_OFFSET 0x00         /** 4 bytes */
@@ -73,6 +74,29 @@ bool attributes_walk(
         if (!attribute_parse_header(record + offset, &header))
         {
             return false;
+        }
+
+        switch (header.type)
+        {
+        case ATTRIBUTE_TYPE_STANDARD_INFORMATION:
+            printf(MESSAGE_MARKER "----$STANDARD_INFORMATION found\n");
+            break;
+
+        case ATTRIBUTE_TYPE_FILE_NAME:
+            printf(MESSAGE_MARKER "----$FILE_NAME found\n");
+            break;
+
+        case ATTRIBUTE_TYPE_DATA:
+            printf(MESSAGE_MARKER "----$DATA found\n");
+            break;
+
+        case ATTRIBUTE_TYPE_BITMAP:
+            printf(MESSAGE_MARKER "----$BITMAP found\n");
+            break;
+
+        default:
+            printf(MESSAGE_MARKER "----Unknown type %u\n", header.type);
+            break;
         }
 
         offset += attribute_length;
