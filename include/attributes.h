@@ -27,6 +27,18 @@ typedef struct
 } attribute_header;
 
 /**
+ * @brief Represents an MFT record $STANDARD_INFORMATION attribute type
+ */
+typedef struct
+{
+    uint8_t creation_time;     /** 0x00 */
+    uint8_t modified_time;     /** 0x08 */
+    uint8_t mft_modified_time; /** 0x10 */
+    uint8_t accessed_time;     /** 0x18 */
+} standard_information;
+
+
+/**
  * @brief Walks the attributes for a given MFT record.
  * @param record Pointer to the record with attributes to walk.
  * @param record_size Size of the record in bytes.
