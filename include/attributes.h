@@ -37,6 +37,16 @@ typedef struct
     uint8_t accessed_time;     /** 0x18 */
 } standard_information;
 
+typedef struct
+{
+    uint8_t parent_directory;  /** 0x00 */
+    uint8_t creation_time;     /** 0x08 */
+    uint8_t modified_time;     /** 0x10 */
+    uint8_t mft_modified_time; /** 0x18 */
+    uint8_t accessed_time;     /** 0x20 */
+    uint8_t allocated_size;    /** 0x28 */
+    uint8_t used_size;         /** 0x30 */
+} file_name;
 
 /**
  * @brief Walks the attributes for a given MFT record.
