@@ -27,6 +27,17 @@ typedef struct
 } attribute_header;
 
 /**
+ * @brief Represents a resident attribute header.
+ */
+typedef struct
+{
+    uint32_t value_length;
+    uint16_t value_offset;
+    uint8_t indexed;
+    uint8_t padding;
+} resident_attribute_header;
+
+/**
  * @brief Represents an MFT record $STANDARD_INFORMATION attribute type
  */
 typedef struct
