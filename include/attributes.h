@@ -28,13 +28,14 @@ typedef struct
 
 /**
  * @brief Represents a resident attribute header.
+ * @note The common attribute header occupies 0x00–0x0F, so the resident header starts at 0x10.
  */
 typedef struct
 {
-    uint32_t value_length;
-    uint16_t value_offset;
-    uint8_t indexed;
-    uint8_t padding;
+    uint32_t value_length; /** 0x00 */
+    uint16_t value_offset; /** 0x04 */
+    uint8_t indexed;       /** 0x06 */
+    uint8_t padding;       /** 0x07 */
 } resident_attribute_header;
 
 /**

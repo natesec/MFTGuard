@@ -21,6 +21,14 @@
  */
 static bool attribute_parse_header(const uint8_t *buffer, attribute_header *header);
 
+/**
+ * @brief Parses the resident header of an attribute and populates the resident
+ *        attribute header fields.
+ * @param buffer Pointer to the buffer containing the resident header.
+ * @param header Pointer to the resident attribute header struct to populate.
+ */
+static bool attribute_parse_resident_header(const uint8_t *buffer, resident_attribute_header *header);
+
 bool attributes_walk(
     const uint8_t *record,
     uint32_t record_size,
@@ -122,6 +130,22 @@ static bool attribute_parse_header(
     header->name_offset = read_u16_le(buffer + 0x0A);
     header->flags = read_u16_le(buffer + 0x0C);
     header->attribute_id = read_u16_le(buffer + 0x0E);
+
+    return true;
+}
+
+static bool attribute_parse_resident_header(const uint8_t *buffer, resident_attribute_header *header)
+{
+    if (buffer == NULL || header == NULL)
+    {
+        fprintf(stderr, ERROR_MARKER "failed to parse resident attribute header\n");
+        return false;
+    }
+
+    header->value_length = read_u32_le(buffer + 0x00);
+    header->value_offset = read_u16_le(buffer + 0x04);
+    header->indexed = buffer[0x06];
+    header->padding = buffer[0x07];
 
     return true;
 }
