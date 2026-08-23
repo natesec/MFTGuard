@@ -88,10 +88,42 @@ bool attributes_walk(
         {
         case ATTRIBUTE_TYPE_STANDARD_INFORMATION:
             printf(MESSAGE_MARKER "----$STANDARD_INFORMATION found\n");
+
+            if (header.non_resident != 0)
+            {
+                fprintf(stderr, ERROR_MARKER "$SI is non-resident\n");
+                return false;
+            }
+
+            resident_attribute_header resident_header;
+
+            if (!attribute_parse_resident_header(
+                record + offset + ATTRIBUTE_DEFAULT_HEADER_SIZE,
+                &resident_header))
+            {
+                return false;
+            }
+
             break;
 
         case ATTRIBUTE_TYPE_FILE_NAME:
             printf(MESSAGE_MARKER "----$FILE_NAME found\n");
+
+            if (header.non_resident != 0)
+            {
+                fprintf(stderr, ERROR_MARKER "$FN is non-resident\n");
+                return false;
+            }
+
+            resident_attribute_header resident_header;
+
+            if (!attribute_parse_resident_header(
+                record + offset + ATTRIBUTE_DEFAULT_HEADER_SIZE,
+                &resident_header))
+            {
+                return false;
+            }
+
             break;
 
         case ATTRIBUTE_TYPE_DATA:
