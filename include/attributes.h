@@ -12,7 +12,9 @@
 #define ATTRIBUTE_TYPE_DATA 0x80
 #define ATTRIBUTE_TYPE_BITMAP 0xB0
 
+/** TODO: update these values once more info is parsed */
 #define STANDARD_INFORMATION_TIMESTAMP_SIZE 0x20
+#define FILE_NAME_TIMESTAMP_SIZE 0x28
 
 /**
  * @brief Represents an MFT record attribute header.
@@ -41,7 +43,7 @@ typedef struct
 } resident_attribute_header;
 
 /**
- * @brief Represents an MFT record $STANDARD_INFORMATION attribute type
+ * @brief Represents an MFT record $STANDARD_INFORMATION attribute type.
  */
 typedef struct
 {
@@ -51,17 +53,19 @@ typedef struct
     uint64_t accessed_time;     /** 0x18 */
 } standard_information;
 
-/** TODO: fix sizes and offsets */
+/**
+ * @brief Represents an MFT record $FILE_NAME attribute type.
+ */
 typedef struct
 {
-    uint8_t parent_directory;  /** 0x00 */
-    uint8_t creation_time;     /** 0x08 */
-    uint8_t modified_time;     /** 0x10 */
-    uint8_t mft_modified_time; /** 0x18 */
-    uint8_t accessed_time;     /** 0x20 */
-    uint8_t allocated_size;    /** 0x28 */
-    uint8_t used_size;         /** 0x30 */
-} file_name;
+    uint64_t parent_directory;  /** 0x00 */
+    uint64_t creation_time;     /** 0x08 */
+    uint64_t modified_time;     /** 0x10 */
+    uint64_t mft_modified_time; /** 0x18 */
+    uint64_t accessed_time;     /** 0x20 */
+    uint64_t allocated_size;    /** 0x28 */
+    uint64_t used_size;         /** 0x30 */
+} file_name_information;
 
 /**
  * @brief Walks the attributes for a given MFT record.

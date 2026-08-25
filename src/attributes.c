@@ -38,6 +38,15 @@ static bool attribute_parse_resident_header(const uint8_t *buffer, resident_attr
  */
 static bool attribute_parse_standard_information(const uint8_t *value, uint32_t value_length, standard_information *si);
 
+/**
+ * @brief Parses the $FILE_NAME attribute type.
+ * @param value Pointer to the raw $FILE_NAME attribute value.
+ * @param value_length Size of the attribute value in bytes.
+ * @param fn Pointer to the $FN struct to receive parsed values.
+ * @return true if parsed successfully, false otherwise.
+ */
+static bool attribute_parse_file_name(const uint8_t *value, uint32_t value_length, file_name_information *fn);
+
 bool attributes_walk(
     const uint8_t *record,
     uint32_t record_size,
@@ -57,11 +66,12 @@ bool attributes_walk(
 
     uint32_t offset = attribute_offset;
 
-    attribute_header header;
-    resident_attribute_header resident_header;
-
     while (offset < record_size)
     {
+        attribute_header header;
+        resident_attribute_header resident_header;
+        const uint8_t *value;
+
         if (record_size - offset < ATTRIBUTE_DEFAULT_HEADER_SIZE)
         {
             fprintf(stderr, ERROR_MARKER "attribute walk failed: incomplete attr header\n");
@@ -130,7 +140,7 @@ bool attributes_walk(
                 return false;
             }
 
-            const uint8_t *value = record + offset + resident_header.value_offset;
+            value = record + offset + resident_header.value_offset;
 
             standard_information si;
 
@@ -177,6 +187,23 @@ bool attributes_walk(
                 fprintf(stderr, ERROR_MARKER "$FN value exceeds attribute bounds\n");
                 return false;
             }
+
+            value = record + offset + resident_header.value_offset;
+            file_name_information fn;
+
+            if (!attribute_parse_file_name(value, resident_header.value_length, &fn))
+            {
+                return false;
+            }
+
+            /** TESTING */
+
+            printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)fn.creation_time);
+            printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)fn.modified_time);
+            printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)fn.mft_modified_time);
+            printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)fn.accessed_time);
+
+            /** ------- */
 
             break;
 
@@ -249,6 +276,22 @@ static bool attribute_parse_standard_information(const uint8_t *value,
     si->modified_time = read_u64_le(value + 0x08);
     si->mft_modified_time = read_u64_le(value + 0x10);
     si->accessed_time = read_u64_le(value + 0x18);
+
+    return true;
+}
+
+static bool attribute_parse_file_name(const uint8_t *value, uint32_t value_length, file_name_information *fn)
+{
+    if (value == NULL || fn == NULL)
+    {
+        fprintf(stderr, ERROR_MARKER "$FN parsing failed\n");
+        return false;
+    }
+
+    fn->creation_time = read_u64_le(value + 0x08);
+    fn->modified_time = read_u64_le(value + 0x10);
+    fn->mft_modified_time = read_u64_le(value + 0x18);
+    fn->accessed_time = read_u64_le(value + 0x20);
 
     return true;
 }
