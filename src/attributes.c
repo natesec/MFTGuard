@@ -104,6 +104,26 @@ bool attributes_walk(
                 return false;
             }
 
+            if (resident_header.value_offset > header.length)
+            {
+                fprintf(stderr, ERROR_MARKER "$SI value offset exceeds attribute length\n");
+                return false;
+            }
+
+            if (resident_header.value_length > header.length - resident_header.value_offset)
+            {
+                fprintf(stderr, ERROR_MARKER "$SI value exceeds attribute bounds\n");
+                return false;
+            }
+
+            if (resident_header.value_length < 0x20)
+            {
+                fprintf(stderr, ERROR_MARKER "$SI does not have four timestamps\n");
+                return false;
+            }
+
+            const uint8_t *value = record + offset + resident_header.value_offset;
+
             break;
 
         case ATTRIBUTE_TYPE_FILE_NAME:
@@ -121,6 +141,18 @@ bool attributes_walk(
                 record + offset + ATTRIBUTE_DEFAULT_HEADER_SIZE,
                 &resident_header))
             {
+                return false;
+            }
+
+            if (resident_header.value_offset > header.length)
+            {
+                fprintf(stderr, ERROR_MARKER "$FN value offset exceeds attribute length\n");
+                return false;
+            }
+
+            if (resident_header.value_length > header.length - resident_header.value_offset)
+            {
+                fprintf(stderr, ERROR_MARKER "$FN value exceeds attribute bounds\n");
                 return false;
             }
 
