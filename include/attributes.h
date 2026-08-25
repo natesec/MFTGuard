@@ -12,6 +12,8 @@
 #define ATTRIBUTE_TYPE_DATA 0x80
 #define ATTRIBUTE_TYPE_BITMAP 0xB0
 
+#define STANDARD_INFORMATION_TIMESTAMP_SIZE 0x20
+
 /**
  * @brief Represents an MFT record attribute header.
  */
@@ -43,12 +45,13 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t creation_time;     /** 0x00 */
-    uint8_t modified_time;     /** 0x08 */
-    uint8_t mft_modified_time; /** 0x10 */
-    uint8_t accessed_time;     /** 0x18 */
+    uint64_t creation_time;     /** 0x00 */
+    uint64_t modified_time;     /** 0x08 */
+    uint64_t mft_modified_time; /** 0x10 */
+    uint64_t accessed_time;     /** 0x18 */
 } standard_information;
 
+/** TODO: fix sizes and offsets */
 typedef struct
 {
     uint8_t parent_directory;  /** 0x00 */

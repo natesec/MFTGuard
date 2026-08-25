@@ -29,6 +29,15 @@ static bool attribute_parse_header(const uint8_t *buffer, attribute_header *head
  */
 static bool attribute_parse_resident_header(const uint8_t *buffer, resident_attribute_header *header);
 
+/**
+ * @brief Parses the attribute of type $STANDARD_INFORMATION.
+ * @param value Pointer to the raw $STANDARD_INFORMATION attribute value.
+ * @param value_length Size of the attribute value in bytes.
+ * @param si Pointer to the $SI struct to receive the parsed values.
+ * @return True if parsed successfully, false otherwise.
+ */
+static bool attribute_parse_standard_information(const uint8_t *value, uint32_t value_length, standard_information *si);
+
 bool attributes_walk(
     const uint8_t *record,
     uint32_t record_size,
@@ -49,6 +58,7 @@ bool attributes_walk(
     uint32_t offset = attribute_offset;
 
     attribute_header header;
+    resident_attribute_header resident_header;
 
     while (offset < record_size)
     {
@@ -95,8 +105,6 @@ bool attributes_walk(
                 return false;
             }
 
-            resident_attribute_header resident_header;
-
             if (!attribute_parse_resident_header(
                 record + offset + ATTRIBUTE_DEFAULT_HEADER_SIZE,
                 &resident_header))
@@ -116,13 +124,29 @@ bool attributes_walk(
                 return false;
             }
 
-            if (resident_header.value_length < 0x20)
+            if (resident_header.value_length < STANDARD_INFORMATION_TIMESTAMP_SIZE)
             {
                 fprintf(stderr, ERROR_MARKER "$SI does not have four timestamps\n");
                 return false;
             }
 
             const uint8_t *value = record + offset + resident_header.value_offset;
+
+            standard_information si;
+
+            if (!attribute_parse_standard_information(value, resident_header.value_length, &si))
+            {
+                return false;
+            }
+
+            /** TESTING */
+
+            printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)si.creation_time);
+            printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)si.modified_time);
+            printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)si.mft_modified_time);
+            printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)si.accessed_time);
+
+            /** ------- */
 
             break;
 
@@ -134,8 +158,6 @@ bool attributes_walk(
                 fprintf(stderr, ERROR_MARKER "$FN is non-resident\n");
                 return false;
             }
-
-            resident_attribute_header resident_header;
 
             if (!attribute_parse_resident_header(
                 record + offset + ATTRIBUTE_DEFAULT_HEADER_SIZE,
@@ -210,6 +232,23 @@ static bool attribute_parse_resident_header(const uint8_t *buffer, resident_attr
     header->value_offset = read_u16_le(buffer + 0x04);
     header->indexed = buffer[0x06];
     header->padding = buffer[0x07];
+
+    return true;
+}
+
+static bool attribute_parse_standard_information(const uint8_t *value,
+    uint32_t value_length, standard_information *si)
+{
+    if (value == NULL || si == NULL)
+    {
+        fprintf(stderr, ERROR_MARKER "$SI parsing failed\n");
+        return false;
+    }
+
+    si->creation_time = read_u64_le(value + 0x00);
+    si->modified_time = read_u64_le(value + 0x08);
+    si->mft_modified_time = read_u64_le(value + 0x10);
+    si->accessed_time = read_u64_le(value + 0x18);
 
     return true;
 }
