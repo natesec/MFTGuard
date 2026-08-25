@@ -46,6 +46,10 @@ int main(int argc, char *argv[])
     printf(MESSAGE_MARKER "Record size: %llu bytes\n", (unsigned long long)mft.record_size);
     printf(MESSAGE_MARKER "Record count: %llu\n", (unsigned long long)mft.record_count);
 
+    /** TESTING */
+    mft.record_number = 1000;
+    /** TESTING */
+
     if (!mft_read_record(&mft))
     {
         mft_close(&mft);

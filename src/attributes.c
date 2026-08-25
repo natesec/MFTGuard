@@ -293,5 +293,28 @@ static bool attribute_parse_file_name(const uint8_t *value, uint32_t value_lengt
     fn->mft_modified_time = read_u64_le(value + 0x18);
     fn->accessed_time = read_u64_le(value + 0x20);
 
+    fn->filename_length = value[0x40];
+    fn->filename_namespace = value[0x41];
+
+    uint32_t filename_size = (uint32_t)fn->filename_length * 2;
+
+    if (0x42 + filename_size > value_length)
+    {
+        fprintf(stderr, ERROR_MARKER "$FN filename size exceeds value size\n");
+        return false;
+    }
+
+    fn->filename = value + 0x42;
+
+    /** TEST */
+
+    wprintf(
+        L"[?]--------FILENAME: %.*ls\n",
+        fn->filename_length,
+        (const wchar_t *)fn->filename
+    );
+
+    /** ---- */
+
     return true;
 }

@@ -65,6 +65,11 @@ typedef struct
     uint64_t accessed_time;     /** 0x20 */
     uint64_t allocated_size;    /** 0x28 */
     uint64_t used_size;         /** 0x30 */
+    uint32_t flags;             /** 0x38 */
+    uint32_t reparse_and_ea;    /** 0x3C */
+    uint8_t filename_length;    /** 0x40 */
+    uint8_t filename_namespace; /** 0x41 */
+    const uint8_t *filename;
 } file_name_information;
 
 /**
