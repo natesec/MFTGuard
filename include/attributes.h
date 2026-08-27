@@ -73,6 +73,20 @@ typedef struct
 } file_name_information;
 
 /**
+ * @brief Used to store parsed attribute data for a record.
+ */
+typedef struct
+{
+    uint64_t record_number;
+
+    bool has_standard_information;
+    standard_information si;
+
+    bool has_file_name_information;
+    file_name_information fn;
+} record_metadata;
+
+/**
  * @brief Walks the attributes for a given MFT record.
  * @param record Pointer to the record with attributes to walk.
  * @param record_size Size of the record in bytes.
