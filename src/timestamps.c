@@ -1,3 +1,23 @@
 #include <stdio.h>
 
 #include "timestamps.h"
+
+bool timestamp_equal(uint64_t first, uint64_t second)
+{
+    return true;
+}
+
+bool timestamp_is_before(uint64_t first, uint64_t second)
+{
+    return true;
+}
+
+bool timestamp_is_after(uint64_t first, uint64_t second)
+{
+    return true;
+}
+
+bool timestamp_low_digits_zeroed(uint64_t timestamp)
+{
+    return true;
+}
