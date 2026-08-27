@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "attributes.h"
+
 #define ERROR_MARKER "[!] "
 #define SUCCESS_MARKER "[+] "
 #define MESSAGE_MARKER "[*] "
@@ -58,6 +60,7 @@ typedef struct
 {
     uint64_t record_number;   /** Index of the MFT record. */
     mft_record_header header; /** Populated MFT record header. */
+    record_metadata metadata; /** Parsed attributes for analysis */
 } mft_record;
 
 /** 

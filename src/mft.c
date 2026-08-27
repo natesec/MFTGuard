@@ -179,10 +179,13 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
         return false;
     }
 
+    record->metadata.record_number= record->record_number;
+
     if (!attributes_walk(
         mft->buffer,
         (uint32_t)mft->record_size,
-        record->header.attribute_offset))
+        record->header.attribute_offset,
+        &record->metadata))
     {
         return false;
     }

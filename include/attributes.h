@@ -96,7 +96,8 @@ typedef struct
 bool attributes_walk(
     const uint8_t *record,
     uint32_t record_size,
-    uint16_t attribute_offset
+    uint16_t attribute_offset,
+    record_metadata *metadata
 );
 
 #endif

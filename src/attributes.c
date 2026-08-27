@@ -50,7 +50,8 @@ static bool attribute_parse_file_name(const uint8_t *value, uint32_t value_lengt
 bool attributes_walk(
     const uint8_t *record,
     uint32_t record_size,
-    uint16_t attribute_offset
+    uint16_t attribute_offset,
+    record_metadata *metadata
 )
 {
     if (record == NULL)
@@ -142,19 +143,19 @@ bool attributes_walk(
 
             value = record + offset + resident_header.value_offset;
 
-            standard_information si;
+            /** standard_information si; **/
 
-            if (!attribute_parse_standard_information(value, resident_header.value_length, &si))
+            if (!attribute_parse_standard_information(value, resident_header.value_length, &metadata->si))
             {
                 return false;
             }
 
             /** TESTING */
 
-            printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)si.creation_time);
-            printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)si.modified_time);
-            printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)si.mft_modified_time);
-            printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)si.accessed_time);
+            printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)metadata->si.creation_time);
+            printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)metadata->si.modified_time);
+            printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)metadata->si.mft_modified_time);
+            printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)metadata->si.accessed_time);
 
             /** ------- */
 
@@ -189,19 +190,20 @@ bool attributes_walk(
             }
 
             value = record + offset + resident_header.value_offset;
-            file_name_information fn;
 
-            if (!attribute_parse_file_name(value, resident_header.value_length, &fn))
+            /** file_name_information fn; **/
+
+            if (!attribute_parse_file_name(value, resident_header.value_length, &metadata->fn))
             {
                 return false;
             }
 
             /** TESTING */
 
-            printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)fn.creation_time);
-            printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)fn.modified_time);
-            printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)fn.mft_modified_time);
-            printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)fn.accessed_time);
+            printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)metadata->fn.creation_time);
+            printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)metadata->fn.modified_time);
+            printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)metadata->fn.mft_modified_time);
+            printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)metadata->fn.accessed_time);
 
             /** ------- */
 
