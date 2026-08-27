@@ -41,13 +41,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    /** TESTING */
+
     printf("\n\n");
     printf(MESSAGE_MARKER "File size: %llu bytes\n", (unsigned long long)mft.file_size);
     printf(MESSAGE_MARKER "Record size: %llu bytes\n", (unsigned long long)mft.record_size);
     printf(MESSAGE_MARKER "Record count: %llu\n", (unsigned long long)mft.record_count);
+    
+    mft.record_number = 625893;
 
-    /** TESTING */
-    mft.record_number = 1000;
     /** TESTING */
 
     if (!mft_read_record(&mft))
@@ -55,6 +57,8 @@ int main(int argc, char *argv[])
         mft_close(&mft);
         return 1;
     }
+
+    /** TESTING */
 
     printf("\n\n");
     printf(
@@ -68,11 +72,15 @@ int main(int argc, char *argv[])
     uint32_t be_signature = read_u32_le(mft.buffer);
     printf(MESSAGE_MARKER "Signature in big-endian: %08X\n", be_signature);
 
+    /** TESTING */
+
     if (!mft_parse_record(&mft, &record, sector_size))
     {
         mft_close(&mft);
         return 1;
     }
+
+    /** TESTING */
 
     printf("\n\n");
     printf(MESSAGE_MARKER "Record number: %llu\n", (unsigned long long)record.record_number);
@@ -82,6 +90,8 @@ int main(int argc, char *argv[])
     printf(MESSAGE_MARKER "USA offset: %u\n", record.header.usa_offset);
     printf(MESSAGE_MARKER "USA count: %u\n", record.header.usa_count);
     printf(MESSAGE_MARKER "Attribute offset: %u\n", record.header.attribute_offset);
+
+    /** TESTING */
 
     mft_close(&mft);
 

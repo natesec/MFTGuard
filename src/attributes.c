@@ -309,7 +309,7 @@ static bool attribute_parse_file_name(const uint8_t *value, uint32_t value_lengt
     /** TEST */
 
     wprintf(
-        L"[?]--------FILENAME: %.*ls\n",
+        L"[?] --------[FILENAME: %.*ls]\n",
         fn->filename_length,
         (const wchar_t *)fn->filename
     );
