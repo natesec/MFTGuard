@@ -15,6 +15,13 @@
  */
 static bool rule_zeroed_timestamp(const record_metadata *metadata);
 
+/**
+ * @brief Detects if all timestamps are identical.
+ * @param metadata Pointer to the record_metadata structure containing parsed attributes.
+ * @return true if all timestamps are identical, false otherwise.
+ */
+static bool rule_identical_timestamps(const record_metadata *metadata);
+
 uint32_t rules_evaluate(const record_metadata *metadata)
 {
     uint32_t rule_flags = 0;
@@ -29,17 +36,17 @@ uint32_t rules_evaluate(const record_metadata *metadata)
         rule_flags |= RULE_FLAG(RULE_ZEROED_TIMESTAMP);
     }
 
+    if (rule_identical_timestamps(metadata))
+    {
+        rule_flags |= RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS);
+    }
+
     return rule_flags; 
 }
 
 static bool rule_zeroed_timestamp(const record_metadata *metadata)
 {
-    if (metadata == NULL)
-    {
-        return false;
-    }
-
-    if (!metadata->has_standard_information)
+    if (metadata == NULL || !metadata->has_standard_information)
     {
         return false;
     }
@@ -67,4 +74,17 @@ static bool rule_zeroed_timestamp(const record_metadata *metadata)
     }
 
     return matches >= ZEROED_TIMESTAMP_MINIMUM_MATCHES;
+}
+
+static bool rule_identical_timestamps(const record_metadata *metadata)
+{
+    if (metadata == NULL || !metadata->has_standard_information)
+    {
+        return false;
+    }
+
+    return
+        timestamp_equal(metadata->si.creation_time, metadata->si.modified_time) &&
+        timestamp_equal(metadata->si.modified_time, metadata->si.mft_modified_time) &&
+        timestamp_equal(metadata->si.mft_modified_time, metadata->si.accessed_time);
 }
