@@ -109,6 +109,13 @@ bool attributes_walk(
         switch (header.type)
         {
         case ATTRIBUTE_TYPE_STANDARD_INFORMATION:
+
+            if (metadata->has_standard_information)
+            {
+                fprintf(stderr, ERROR_MARKER "record contains multiple SI structures\n");
+                break;
+            }
+
             printf(MESSAGE_MARKER "----$STANDARD_INFORMATION found\n");
 
             if (header.non_resident != 0)
@@ -151,6 +158,8 @@ bool attributes_walk(
                 return false;
             }
 
+            metadata->has_standard_information = true;
+
             /** TESTING */
 
             printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)metadata->si.creation_time);
@@ -184,6 +193,13 @@ bool attributes_walk(
             break;
 
         case ATTRIBUTE_TYPE_FILE_NAME:
+
+            if (metadata->has_file_name_information)
+            {
+                fprintf(stderr, ERROR_MARKER "record contains multiple FN structures\n");
+                break;
+            }
+
             printf(MESSAGE_MARKER "----$FILE_NAME found\n");
 
             if (header.non_resident != 0)
@@ -219,6 +235,8 @@ bool attributes_walk(
             {
                 return false;
             }
+
+            metadata->has_file_name_information = true;
 
             /** TESTING */
 
