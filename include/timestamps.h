@@ -32,9 +32,10 @@ bool timestamp_is_after(uint64_t first, uint64_t second);
 /**
  * @brief Check if the low digits of a timestamp are zeroed out.
  * @param timestamp The Timestamp to check.
- * @return true if the low digits are zeroed, false otherwise.
+ * @param digits_zeroed The number of low digits to check.
+ * @return true if the specified number of low digits are zeroed, false otherwise.
  */
-bool timestamp_low_digits_zeroed(uint64_t timestamp);
+bool timestamp_low_digits_zeroed(uint64_t timestamp, uint32_t digits_zeroed);
 
 /**
  * @brief Converts a NTFS FILETIME timestamp to a UTC calendar timestamp.

@@ -24,9 +24,26 @@ bool timestamp_is_after(uint64_t first, uint64_t second)
 }
 
 /** TODO: implement after filetime to datetime conversion is complete */
-bool timestamp_low_digits_zeroed(uint64_t timestamp)
+bool timestamp_low_digits_zeroed(uint64_t timestamp, uint32_t digits_zeroed)
 {
-    return true;
+    if (digits_zeroed == 0)
+    {
+        return false;
+    }
+
+    uint64_t divisor = 1;
+
+    for (int i=0; i < digits_zeroed; i++)
+    {
+        if (divisor > UINT64_MAX / 10)
+        {
+            return false;
+        }
+
+        divisor *= 10;
+    }
+
+    return timestamp % divisor == 0;
 }
 
 bool filetime_to_utc(uint64_t filetime, struct tm *result)
