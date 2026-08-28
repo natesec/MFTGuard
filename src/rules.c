@@ -7,6 +7,14 @@
 
 #define ZEROED_TIMESTAMP_DIGITS 9
 #define ZEROED_TIMESTAMP_MINIMUM_MATCHES 2
+#define SI_FN_MISMATCH_THRESHOLD 3
+
+/**
+ * @brief Detects if a variable number of timestamps in the $SI and $FN attributes don't match.
+ * @param metadata Pointer to the record_metadata structure containing parsed attributes.
+ * @return uint32_t number of mismatches.
+ */
+static uint32_t rule_si_fn_mismatch(const record_metadata *metadata);
 
 /**
  * @brief Detects if multiple timestamps have a variable number of trailing zeroes.
@@ -31,6 +39,13 @@ uint32_t rules_evaluate(const record_metadata *metadata)
         return RULE_NONE;
     }
 
+    uint32_t rule_si_fn_mismatch_count = rule_si_fn_mismatch(metadata);
+    
+    if (rule_si_fn_mismatch_count >= SI_FN_MISMATCH_THRESHOLD)
+    {
+        rule_flags |= RULE_FLAG(RULE_SN_FN_MISMATCH);
+    }
+
     if (rule_zeroed_timestamp(metadata))
     {
         rule_flags |= RULE_FLAG(RULE_ZEROED_TIMESTAMP);
@@ -42,6 +57,38 @@ uint32_t rules_evaluate(const record_metadata *metadata)
     }
 
     return rule_flags; 
+}
+
+static uint32_t rule_si_fn_mismatch(const record_metadata *metadata)
+{
+    if (metadata == NULL || !metadata->has_standard_information || metadata->has_file_name_information)
+    {
+        return 0;
+    }
+
+    uint32_t mismatches = 0;
+
+    if (!timestamp_equal(metadata->si.creation_time, metadata->fn.creation_time))
+    {
+        mismatches++;
+    }
+
+    if (!timestamp_equal(metadata->si.modified_time, metadata->fn.modified_time))
+    {
+        mismatches++;
+    }
+
+    if (!timestamp_equal(metadata->si.mft_modified_time, metadata->fn.mft_modified_time))
+    {
+        mismatches++;
+    }
+
+    if (!timestamp_equal(metadata->si.accessed_time, metadata->fn.accessed_time))
+    {
+        mismatches++;
+    }
+
+    return mismatches;
 }
 
 static bool rule_zeroed_timestamp(const record_metadata *metadata)
