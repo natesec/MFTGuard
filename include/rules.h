@@ -4,11 +4,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "attributes.h"
+
 /**
  * Used to bit shift rule IDs into respective positions marked
  * by the rule_id enum.
  */
 #define RULE_FLAG(id) (1u << (id))
+
+#define RULE_NONE 0u
 
 /**
  * @brief Represents an ID for each detection rule.
@@ -25,5 +29,12 @@ typedef enum
 
     RULE_COUNT
 } rule_id;
+
+/**
+ * @brief Evaluates all detection rules and returns the resulting rule flags.
+ * @param metadata Pointer to the record_metadata structure containing parsed attributes.
+ * @return uint32_t bitmask containing the results of all triggered detection rules.
+ */
+uint32_t rules_evaluate(const record_metadata *metadata);
 
 #endif
