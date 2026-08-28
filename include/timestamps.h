@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <time.h>
 
 /**
  * @brief Check if two timestamps are equal.
@@ -34,5 +35,13 @@ bool timestamp_is_after(uint64_t first, uint64_t second);
  * @return true if the low digits are zeroed, false otherwise.
  */
 bool timestamp_low_digits_zeroed(uint64_t timestamp);
+
+/**
+ * @brief Converts a NTFS FILETIME timestamp to a UTC calendar timestamp.
+ * @param filetime Timestamp in FILETIME format to be converted.
+ * @param result Pointer to a struct that receives the converted UTC timestamp.
+ * @return true if conversion was successful, false otherwise.
+ */
+bool filetime_to_utc(uint64_t filetime, struct tm *result);
 
 #endif
