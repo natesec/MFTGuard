@@ -2,6 +2,7 @@
 
 #include "attributes.h"
 #include "utils.h"
+#include "timestamps.h"
 
 #define ERROR_MARKER "[!] "
 #define MESSAGE_MARKER "[*] "
@@ -156,6 +157,22 @@ bool attributes_walk(
             printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)metadata->si.modified_time);
             printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)metadata->si.mft_modified_time);
             printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)metadata->si.accessed_time);
+
+            struct tm utc_time;
+
+            if (filetime_to_utc(metadata->si.creation_time, &utc_time))
+            {
+                printf(
+                    MESSAGE_MARKER
+                    "--------Created time in UTC: %04d-%02d-%02d %02d:%02d:%02d UTC\n",
+                    utc_time.tm_year + 1900,
+                    utc_time.tm_mon + 1,
+                    utc_time.tm_mday,
+                    utc_time.tm_hour,
+                    utc_time.tm_min,
+                    utc_time.tm_sec
+                );
+            }
 
             /** ------- */
 
