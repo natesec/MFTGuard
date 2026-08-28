@@ -192,7 +192,7 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
 
     /** TESTING */
     
-    printf("\n\n[?] record_metadata");
+    printf("\n\n[?] record_metadata\n");
 
     if (record->metadata.has_standard_information)
     {

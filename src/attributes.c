@@ -174,6 +174,11 @@ bool attributes_walk(
                 );
             }
 
+            if (timestamp_low_digits_zeroed(metadata->si.creation_time, 9))
+            {
+                printf(MESSAGE_MARKER "--------Remaining 9 digits of created time zeroed!\n");
+            }
+
             /** ------- */
 
             break;
