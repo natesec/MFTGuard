@@ -160,36 +160,6 @@ bool attributes_walk(
 
             metadata->has_standard_information = true;
 
-            /** TESTING */
-
-            printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)metadata->si.creation_time);
-            printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)metadata->si.modified_time);
-            printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)metadata->si.mft_modified_time);
-            printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)metadata->si.accessed_time);
-
-            struct tm utc_time;
-
-            if (filetime_to_utc(metadata->si.creation_time, &utc_time))
-            {
-                printf(
-                    MESSAGE_MARKER
-                    "--------Created time in UTC: %04d-%02d-%02d %02d:%02d:%02d UTC\n",
-                    utc_time.tm_year + 1900,
-                    utc_time.tm_mon + 1,
-                    utc_time.tm_mday,
-                    utc_time.tm_hour,
-                    utc_time.tm_min,
-                    utc_time.tm_sec
-                );
-            }
-
-            if (timestamp_low_digits_zeroed(metadata->si.creation_time, 9))
-            {
-                printf(MESSAGE_MARKER "--------Remaining 9 digits of created time zeroed!\n");
-            }
-
-            /** TESTING */
-
             break;
 
         case ATTRIBUTE_TYPE_FILE_NAME:
@@ -237,15 +207,6 @@ bool attributes_walk(
             }
 
             metadata->has_file_name_information = true;
-
-            /** TESTING */
-
-            printf(MESSAGE_MARKER "--------Created time: 0x%016llx\n", (unsigned long long)metadata->fn.creation_time);
-            printf(MESSAGE_MARKER "--------Modified time: 0x%016llx\n", (unsigned long long)metadata->fn.modified_time);
-            printf(MESSAGE_MARKER "--------MFT modified time: 0x%016llx\n", (unsigned long long)metadata->fn.mft_modified_time);
-            printf(MESSAGE_MARKER "--------Accessed time: 0x%016llx\n", (unsigned long long)metadata->fn.accessed_time);
-
-            /** ------- */
 
             break;
 
