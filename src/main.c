@@ -2,6 +2,7 @@
 #include "mft.h"
 #include "utils.h"
 #include "rules.h"
+#include "report.h"
 
 int main(int argc, char *argv[])
 {
@@ -101,6 +102,7 @@ int main(int argc, char *argv[])
         printf("\n\n");
         printf(MESSAGE_MARKER "At least one rule was detected: %u\n", rule_flags);
         /** TODO: pass rule flags to reporting */
+        report_record(&record, rule_flags);
     }
 
     mft_close(&mft);
