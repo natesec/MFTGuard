@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "mft.h"
 #include "utils.h"
+#include "rules.h"
 
 int main(int argc, char *argv[])
 {
@@ -92,6 +93,15 @@ int main(int argc, char *argv[])
     printf(MESSAGE_MARKER "Attribute offset: %u\n", record.header.attribute_offset);
 
     /** TESTING */
+
+    uint32_t rule_flags = rules_evaluate(&record.metadata);
+
+    if (rule_flags != RULE_NONE)
+    {
+        printf("\n\n");
+        printf(MESSAGE_MARKER "At least one rule was detected: %u\n", rule_flags);
+        /** TODO: pass rule flags to reporting */
+    }
 
     mft_close(&mft);
 
