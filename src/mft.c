@@ -144,6 +144,9 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
         return false;
     }
 
+    // Reset record_metadata structure field in record.
+    record->metadata = (record_metadata){0};
+
     memcpy(record->header.signature, mft->buffer + 0x0, 4);
 
     record->header.usa_offset = read_u16_le(mft->buffer + 0x04);
@@ -180,8 +183,6 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
     }
 
     record->metadata.record_number = record->record_number;
-    record->metadata.has_standard_information = false;
-    record->metadata.has_file_name_information = false;
 
     if (!attributes_walk(
         mft->buffer,
