@@ -44,11 +44,6 @@ int main(int argc, char *argv[])
     }
 
     /** TESTING */
-
-    printf("\n\n");
-    printf(MESSAGE_MARKER "File size: %llu bytes\n", (unsigned long long)mft.file_size);
-    printf(MESSAGE_MARKER "Record size: %llu bytes\n", (unsigned long long)mft.record_size);
-    printf(MESSAGE_MARKER "Record count: %llu\n", (unsigned long long)mft.record_count);
     
     mft.record_number = 625893;
 
@@ -60,48 +55,16 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    /** TESTING */
-
-    printf("\n\n");
-    printf(
-        MESSAGE_MARKER "Signature: %02X %02X %02X %02X\n",
-        mft.buffer[0], // 46
-        mft.buffer[1], // 49
-        mft.buffer[2], // 4C
-        mft.buffer[3]  // 45
-        );
-    
-    uint32_t be_signature = read_u32_le(mft.buffer);
-    printf(MESSAGE_MARKER "Signature in big-endian: %08X\n", be_signature);
-
-    /** TESTING */
-
     if (!mft_parse_record(&mft, &record, sector_size))
     {
         mft_close(&mft);
         return 1;
     }
 
-    /** TESTING */
-
-    printf("\n\n");
-    printf(MESSAGE_MARKER "Record number: %llu\n", (unsigned long long)record.record_number);
-    printf(MESSAGE_MARKER "Record header number: %u\n", record.header.record_number);
-    printf(MESSAGE_MARKER "Used size: %u\n", record.header.used_size);
-    printf(MESSAGE_MARKER "Allocated size: %u\n", record.header.allocated_size);
-    printf(MESSAGE_MARKER "USA offset: %u\n", record.header.usa_offset);
-    printf(MESSAGE_MARKER "USA count: %u\n", record.header.usa_count);
-    printf(MESSAGE_MARKER "Attribute offset: %u\n", record.header.attribute_offset);
-
-    /** TESTING */
-
     uint32_t rule_flags = rules_evaluate(&record.metadata);
 
     if (rule_flags != RULE_NONE)
     {
-        printf("\n\n");
-        printf(MESSAGE_MARKER "At least one rule was detected: %u\n", rule_flags);
-        /** TODO: pass rule flags to reporting */
         report_record(&record, rule_flags);
     }
 

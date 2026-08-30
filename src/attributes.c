@@ -5,7 +5,6 @@
 #include "timestamps.h"
 
 #define ERROR_MARKER "[!] "
-#define MESSAGE_MARKER "[*] "
 
 /** First 2 attribute header fields*/
 #define ATTRIBUTE_TYPE_OFFSET 0x00         /** 4 bytes */
@@ -116,8 +115,6 @@ bool attributes_walk(
                 break;
             }
 
-            printf(MESSAGE_MARKER "----$STANDARD_INFORMATION found\n");
-
             if (header.non_resident != 0)
             {
                 fprintf(stderr, ERROR_MARKER "$SI is non-resident\n");
@@ -170,8 +167,6 @@ bool attributes_walk(
                 break;
             }
 
-            printf(MESSAGE_MARKER "----$FILE_NAME found\n");
-
             if (header.non_resident != 0)
             {
                 fprintf(stderr, ERROR_MARKER "$FN is non-resident\n");
@@ -211,15 +206,12 @@ bool attributes_walk(
             break;
 
         case ATTRIBUTE_TYPE_DATA:
-            printf(MESSAGE_MARKER "----$DATA found\n");
             break;
 
         case ATTRIBUTE_TYPE_BITMAP:
-            printf(MESSAGE_MARKER "----$BITMAP found\n");
             break;
 
         default:
-            printf(MESSAGE_MARKER "----Unknown type %u\n", header.type);
             break;
         }
 

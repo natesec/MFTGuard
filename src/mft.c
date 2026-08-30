@@ -165,7 +165,6 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
 
     record->record_number = mft->record_number;
 
-    /** TODO: apply/validate fixups, walk attributes, timestamp analysis */
     if (!mft_validate_record_header(mft, record))
     {
         return false;
@@ -192,24 +191,6 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
     {
         return false;
     }
-
-    /** TESTING */
-    
-    printf("\n\n[?] record_metadata\n");
-
-    if (record->metadata.has_standard_information)
-    {
-        printf(MESSAGE_MARKER "SI creation: 0x%016llx\n",
-        (unsigned long long)record->metadata.si.creation_time);
-    }
-
-    if (record->metadata.has_file_name_information)
-    {
-        printf(MESSAGE_MARKER "FN creation: 0x%016llx\n",
-        (unsigned long long)record->metadata.fn.creation_time);
-    }
-
-    /** TESTING */
 
     return true;
 }
