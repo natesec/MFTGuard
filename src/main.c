@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     }
 
     mft_file mft;
-    mft_record record;
+    mft_record record = {0};
 
     printf(MESSAGE_MARKER "Opening $MFT file...\n");
 
@@ -44,31 +44,52 @@ int main(int argc, char *argv[])
     }
 
     /** TESTING */
-    
-    mft.record_number = 625893;
+    //mft.record_number = 625893;
+    uint64_t test_record_limit = 30;
+    printf(
+        MESSAGE_MARKER "Scanning first %llu records...\n",
+        (unsigned long long)test_record_limit
+    );
 
-    /** TESTING */
+    uint64_t records_processed = 0;
+    uint64_t records_skipped = 0;
+    uint64_t records_flagged = 0;
 
-    if (!mft_read_record(&mft))
+    /* while (mft.record_number < mft.record_count) */
+    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
     {
-        mft_close(&mft);
-        return 1;
-    }
+        if (!mft_read_record(&mft))
+        {
+            records_skipped++;
+            mft.record_number++;
+            continue;
+        }
 
-    if (!mft_parse_record(&mft, &record, sector_size))
-    {
-        mft_close(&mft);
-        return 1;
-    }
+        if (!mft_parse_record(&mft, &record, sector_size))
+        {
+            records_skipped++;
+            mft.record_number++;
+            continue;
+        }
 
-    uint32_t rule_flags = rules_evaluate(&record.metadata);
+        records_processed++;
 
-    if (rule_flags != RULE_NONE)
-    {
-        report_record(&record, rule_flags);
+        uint32_t rule_flags = rules_evaluate(&record.metadata);
+
+        if (rule_flags != RULE_NONE)
+        {
+            records_flagged++;
+            report_record(&record, rule_flags);
+        }
+
+        mft.record_number++;
     }
 
     mft_close(&mft);
+
+    printf("Records processed: %llu\n", (unsigned long long)records_processed);
+    printf("Records skipped: %llu\n", (unsigned long long)records_skipped);
+    printf("Records flagged: %llu\n", (unsigned long long)records_flagged);
 
     printf("\n\n");
     printf(SUCCESS_MARKER "MFT closed successfully\n");

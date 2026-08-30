@@ -93,7 +93,7 @@ bool mft_read_record(mft_file *mft)
         return false;
     }
 
-    if (mft->record_number > mft->record_count)
+    if (mft->record_number >= mft->record_count)
     {
         fprintf(stderr, ERROR_MARKER "record number out of range\n");
         return false;
