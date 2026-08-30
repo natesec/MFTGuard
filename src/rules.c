@@ -76,7 +76,10 @@ uint32_t rules_evaluate(const record_metadata *metadata)
 
 static uint32_t rule_si_fn_mismatch(const record_metadata *metadata)
 {
-    if (metadata == NULL || !metadata->has_standard_information || metadata->has_file_name_information)
+    if (metadata == NULL ||
+        !metadata->has_standard_information ||
+        !metadata->has_file_name_information ||
+        !metadata->has_usable_file_name_information)
     {
         return 0;
     }

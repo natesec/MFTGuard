@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
 
     uint64_t records_processed = 0;
     uint64_t records_unused = 0;
+    uint64_t records_reserved = 0;
     uint64_t records_skipped = 0;
     uint64_t records_flagged = 0;
 
@@ -82,6 +83,13 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        if (status == MFT_RECORD_RESERVED)
+        {
+            records_reserved++;
+            mft.record_number++;
+            continue;
+        }
+
         records_processed++;
 
         uint32_t rule_flags = rules_evaluate(&record.metadata);
@@ -101,6 +109,7 @@ int main(int argc, char *argv[])
 
     printf("Records processed: %llu\n", (unsigned long long)records_processed);
     printf("Unused records: %llu\n", (unsigned long long)records_unused);
+    printf("Reserved Records: %llu\n", (unsigned long long)records_reserved);
     printf("Records skipped: %llu\n", (unsigned long long)records_skipped);
     printf("Records flagged: %llu\n", (unsigned long long)records_flagged);
 

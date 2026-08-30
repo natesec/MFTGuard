@@ -26,12 +26,14 @@ void report_record(const mft_record *record, uint32_t rule_flags)
 
     printf(SUCCESS_MARKER "SUSPICIOUS RECORD: %llu\n", (unsigned long long)record->record_number);
 
-    wprintf(
-        L"[+] Filename: %.*ls\n",
-        record->metadata.fn.filename_length,
-        (const wchar_t *)record->metadata.fn.filename
-    );
-
+    if (record->metadata.has_file_name_information && record->metadata.has_usable_file_name_information)
+    {
+        wprintf(
+            L"[+] Filename: %.*ls\n",
+            record->metadata.fn.filename_length,
+            (const wchar_t *)record->metadata.fn.filename
+        );
+    }
 
     printf("\n");
 
@@ -43,13 +45,16 @@ void report_record(const mft_record *record, uint32_t rule_flags)
 
     printf("\n");
 
-    printf(SUCCESS_MARKER "$FILE_NAME_INFORMATION\n");
-    report_timestamp("Created:", record->metadata.fn.creation_time);
-    report_timestamp("Modified:", record->metadata.fn.modified_time);
-    report_timestamp("MFT Modified:", record->metadata.fn.mft_modified_time);
-    report_timestamp("Accessed:", record->metadata.fn.modified_time);
+    if (record->metadata.has_file_name_information && record->metadata.has_usable_file_name_information)
+    {
+        printf(SUCCESS_MARKER "$FILE_NAME_INFORMATION\n");
+        report_timestamp("Created:", record->metadata.fn.creation_time);
+        report_timestamp("Modified:", record->metadata.fn.modified_time);
+        report_timestamp("MFT Modified:", record->metadata.fn.mft_modified_time);
+        report_timestamp("Accessed:", record->metadata.fn.modified_time);
 
-    printf("\n");
+        printf("\n");
+    }
 
     printf(SUCCESS_MARKER "DETECTION RULES TRIGGERED:\n");
 

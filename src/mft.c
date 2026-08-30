@@ -9,6 +9,8 @@
 #include "utils.h"
 
 #define MFT_RECORD_FLAG_IN_USE 0x0001
+#define MFT_RECORD_FIRST_RESERVED 0
+#define MFT_RECORD_LAST_RESERVED 15
 
 /**
  * @brief Calculate file size of the $MFT file.
@@ -166,6 +168,12 @@ mft_record_status mft_parse_record(mft_file *mft, mft_record *record, uint32_t s
     record->header.record_number = read_u32_le(mft->buffer + 0x2C);
 
     record->record_number = mft->record_number;
+
+    if (record->record_number >= MFT_RECORD_FIRST_RESERVED &&
+        record->record_number <= MFT_RECORD_LAST_RESERVED)
+    {
+        return MFT_RECORD_RESERVED;
+    }
 
     if (!mft_validate_record_header(mft, record))
     {

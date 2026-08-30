@@ -203,6 +203,14 @@ bool attributes_walk(
 
             metadata->has_file_name_information = true;
 
+            /** TODO: stricter criterion for what constitutes a usable file_name */
+            if (!metadata->fn.filename_length > 0)
+            {
+                metadata->has_usable_file_name_information = false;
+            }
+
+            metadata->has_usable_file_name_information = true;
+
             break;
 
         case ATTRIBUTE_TYPE_DATA:

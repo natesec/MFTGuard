@@ -60,6 +60,7 @@ typedef enum
 {
     MFT_RECORD_INVALID,
     MFT_RECORD_UNUSED,
+    MFT_RECORD_RESERVED,
     MFT_RECORD_USED
 } mft_record_status;
 

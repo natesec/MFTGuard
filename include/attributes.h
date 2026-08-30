@@ -83,6 +83,7 @@ typedef struct
     standard_information si;
 
     bool has_file_name_information;
+    bool has_usable_file_name_information;
     file_name_information fn;
 } record_metadata;
 
