@@ -6,6 +6,7 @@
 #include "timestamps.h"
 
 #define RULE_MARKER "----"
+#define REPORT_BANNER "-------------------------------------------------\n"
 
 /**
  * @brief Report filetime timestamp in UTC date time format.
@@ -21,7 +22,8 @@ void report_record(const mft_record *record, uint32_t rule_flags)
         return;
     }
 
-    printf("\n");
+    printf("\n" REPORT_BANNER);
+
     printf(SUCCESS_MARKER "SUSPICIOUS RECORD: %llu\n", (unsigned long long)record->record_number);
 
     wprintf(
@@ -70,6 +72,8 @@ void report_record(const mft_record *record, uint32_t rule_flags)
     {
         printf(RULE_MARKER "Identical timestamps detected\n");
     }
+
+    printf(REPORT_BANNER "\n");
 }
 
 static void report_timestamp(const char *label, uint64_t filetime)

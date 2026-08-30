@@ -367,31 +367,31 @@ static bool mft_validate_record_header(const mft_file *mft, const mft_record *re
 
     if (header->usa_offset >= mft->record_size)
     {
-        fprintf(stderr, ERROR_MARKER "invalid record header: usa offset > record size");
+        fprintf(stderr, ERROR_MARKER "invalid record header: usa offset > record size\n");
         return false;
     }
 
     if (header->usa_count == 0)
     {
-        fprintf(stderr, ERROR_MARKER "invalid record header: usa count = 0");
+        fprintf(stderr, ERROR_MARKER "invalid record header: usa count = 0\n");
         return false;
     }
 
     if (header->attribute_offset >= mft->record_size)
     {
-        fprintf(stderr, ERROR_MARKER "invalid record header: attr offset > record size");
+        fprintf(stderr, ERROR_MARKER "invalid record header: attr offset > record size\n");
         return false;
     }
 
     if (header->used_size > header->allocated_size)
     {
-        fprintf(stderr, ERROR_MARKER "invalid record header: used size > allocated size");
+        fprintf(stderr, ERROR_MARKER "invalid record header: used size > allocated size\n");
         return false;
     }
 
     if (header->used_size > mft->record_size)
     {
-        fprintf(stderr, ERROR_MARKER "invalid record header: used size > record size");
+        fprintf(stderr, ERROR_MARKER "invalid record header: used size > record size\n");
         return false;
     }
 

@@ -87,11 +87,14 @@ int main(int argc, char *argv[])
 
     mft_close(&mft);
 
+    printf("\n\n");
+
     printf("Records processed: %llu\n", (unsigned long long)records_processed);
     printf("Records skipped: %llu\n", (unsigned long long)records_skipped);
     printf("Records flagged: %llu\n", (unsigned long long)records_flagged);
 
     printf("\n\n");
+    
     printf(SUCCESS_MARKER "MFT closed successfully\n");
 
     return 0;
