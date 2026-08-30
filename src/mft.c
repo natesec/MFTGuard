@@ -8,6 +8,8 @@
 /** Little-endian conversion */
 #include "utils.h"
 
+#define MFT_RECORD_FLAG_IN_USE 0x0001
+
 /**
  * @brief Calculate file size of the $MFT file.
  * @param mft Pointer to the declared mft_file structure.
@@ -129,19 +131,19 @@ bool mft_read_record(mft_file *mft)
 /**
  * Interpret current buffer. Populate mft_record.
  */
-bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
+mft_record_status mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
 {
     if (mft == NULL || record == NULL || mft->buffer == NULL)
     {
         fprintf(stderr, ERROR_MARKER "failed to parse MFT record\n");
-        return false;
+        return MFT_RECORD_INVALID;
     }
 
     // Size of the record header = 0x30 / 48 bytes.
     if (mft->record_size < 0x30)
     {
         fprintf(stderr, ERROR_MARKER "record is too small\n");
-        return false;
+        return MFT_RECORD_INVALID;
     }
 
     // Reset record_metadata structure field in record.
@@ -167,7 +169,12 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
 
     if (!mft_validate_record_header(mft, record))
     {
-        return false;
+        return MFT_RECORD_INVALID;
+    }
+
+    if ((record->header.flags && MFT_RECORD_FLAG_IN_USE) == 0)
+    {
+        return MFT_RECORD_UNUSED;
     }
 
     if (!fixup_apply(
@@ -178,7 +185,7 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
         record->header.usa_count))
     {
         /** TODO: Store record number for report if USN mismatches (use enum in fixup.c/h) */
-        return false;
+        return MFT_RECORD_INVALID;
     }
 
     record->metadata.record_number = record->record_number;
@@ -189,10 +196,10 @@ bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size)
         record->header.attribute_offset,
         &record->metadata))
     {
-        return false;
+        return MFT_RECORD_INVALID;
     }
 
-    return true;
+    return MFT_RECORD_USED;
 }
 
 /**

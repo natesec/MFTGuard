@@ -54,6 +54,16 @@ typedef struct
 } mft_record_header;
 
 /**
+ * @brief Represents the result of parsing an MFT record.
+ */
+typedef enum
+{
+    MFT_RECORD_INVALID,
+    MFT_RECORD_UNUSED,
+    MFT_RECORD_USED
+} mft_record_status;
+
+/**
  * @brief Represents a parsed MFT record.
  */
 typedef struct
@@ -85,7 +95,7 @@ bool mft_read_record(mft_file *mft);
  * @param sector_size Size of the disk sectors (declared in $Boot).
  * @return true if the record was parsed and is valid, false otherwise. 
  */
-bool mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size);
+mft_record_status mft_parse_record(mft_file *mft, mft_record *record, uint32_t sector_size);
 
 /**
  * @brief Closes the MFT file and frees allocated buffer.

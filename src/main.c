@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     );
 
     uint64_t records_processed = 0;
+    uint64_t records_unused = 0;
     uint64_t records_skipped = 0;
     uint64_t records_flagged = 0;
 
@@ -65,9 +66,18 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        if (!mft_parse_record(&mft, &record, sector_size))
+        mft_record_status status = mft_parse_record(&mft, &record, sector_size);
+
+        if (status == MFT_RECORD_INVALID)
         {
             records_skipped++;
+            mft.record_number++;
+            continue;
+        }
+
+        if (status == MFT_RECORD_UNUSED)
+        {
+            records_unused++;
             mft.record_number++;
             continue;
         }
@@ -87,14 +97,15 @@ int main(int argc, char *argv[])
 
     mft_close(&mft);
 
-    printf("\n\n");
+    printf("\n");
 
     printf("Records processed: %llu\n", (unsigned long long)records_processed);
+    printf("Unused records: %llu\n", (unsigned long long)records_unused);
     printf("Records skipped: %llu\n", (unsigned long long)records_skipped);
     printf("Records flagged: %llu\n", (unsigned long long)records_flagged);
 
     printf("\n\n");
-    
+
     printf(SUCCESS_MARKER "MFT closed successfully\n");
 
     return 0;
