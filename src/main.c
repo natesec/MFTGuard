@@ -108,10 +108,10 @@ int main(int argc, char *argv[])
     printf("\n");
 
     printf("Records processed: %llu\n", (unsigned long long)records_processed);
+    printf("Records flagged: %llu\n", (unsigned long long)records_flagged);
     printf("Unused records: %llu\n", (unsigned long long)records_unused);
     printf("Reserved Records: %llu\n", (unsigned long long)records_reserved);
     printf("Records skipped: %llu\n", (unsigned long long)records_skipped);
-    printf("Records flagged: %llu\n", (unsigned long long)records_flagged);
 
     printf("\n\n");
 
