@@ -74,6 +74,36 @@ uint32_t rules_evaluate(const record_metadata *metadata)
     return rule_flags; 
 }
 
+bool rules_should_report(uint32_t rule_flags)
+{
+    if (rule_flags == RULE_NONE)
+    {
+        return false;
+    }
+
+    if (rule_flags & RULE_FLAG(RULE_TIMESTAMP_ROLLBACK))
+    {
+        return true;
+    }
+
+    if ((rule_flags & RULE_FLAG(RULE_SN_FN_MISMATCH)) && (rule_flags & RULE_FLAG(RULE_ZEROED_TIMESTAMP)))
+    {
+        return true;
+    }
+
+    if ((rule_flags & RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS)) && (rule_flags & RULE_FLAG(RULE_ZEROED_TIMESTAMP)))
+    {
+        return true;
+    }
+
+    if ((rule_flags & RULE_FLAG(RULE_SN_FN_MISMATCH)) && (rule_flags & RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS)))
+    {
+        return true;
+    }
+
+    return false;
+}
+
 static uint32_t rule_si_fn_mismatch(const record_metadata *metadata)
 {
     if (metadata == NULL ||

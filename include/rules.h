@@ -37,4 +37,11 @@ typedef enum
  */
 uint32_t rules_evaluate(const record_metadata *metadata);
 
+/**
+ * @brief Determines whether a combination of rule flags constitutes a record report.
+ * @param uint32_t rule flags bitmask containing all triggered detections rules.
+ * @return true if the record should be reported, false otherwise.
+ */
+bool rules_should_report(uint32_t rule_flags);
+
 #endif

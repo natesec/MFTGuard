@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 
         uint32_t rule_flags = rules_evaluate(&record.metadata);
 
-        if (rule_flags != RULE_NONE)
+        if (rules_should_report(rule_flags))
         {
             records_flagged++;
             report_record(&record, rule_flags);
