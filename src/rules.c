@@ -177,27 +177,40 @@ static uint32_t rule_timestamp_rollback(const record_metadata *metadata)
         return 0;
     }
 
-    uint32_t rollbacks = 0;
+    uint32_t rollback_count = 0;
 
-    /** TODO: determine forensic significance of creation times */
-    /** if (metadata->si.creation_time < metadata->fn.creation_time) */
-
-    if (metadata->si.modified_time < metadata->fn.modified_time)
+    for (uint32_t i = 0; i < metadata->file_name_count; i++)
     {
-        rollbacks++;
+
+        const file_name_information *fn = &metadata->file_names[i];
+
+        if (!fn->is_usable)
+        {
+            continue;
+        }
+
+        uint32_t rollbacks = 0;
+
+        /** TODO: determine forensic significance of creation times */
+        /** if (metadata->si.creation_time < metadata->fn.creation_time) */
+
+        if (metadata->si.modified_time < fn->modified_time)
+        {
+            rollbacks++;
+        }
+
+        if (metadata->si.mft_modified_time < fn->mft_modified_time)
+        {
+            rollbacks++;
+        }
+
+        if (metadata->si.accessed_time < fn->accessed_time)
+        {
+            rollbacks++;
+        }
     }
 
-    if (metadata->si.mft_modified_time < metadata->fn.mft_modified_time)
-    {
-        rollbacks++;
-    }
-
-    if (metadata->si.accessed_time < metadata->fn.accessed_time)
-    {
-        rollbacks++;
-    }
-
-    return rollbacks;
+    return rollback_count;
 }
 
 static bool rule_zeroed_timestamp(const record_metadata *metadata)
