@@ -107,39 +107,13 @@ bool attributes_walk(
  * @brief Establish a known empty state for record_metadata struct.
  * @param metadata Pointer to the metadata struct to initialize.
  */
-void record_metadata_init(record_metadata *metadata)
-{
-    if (metadata == NULL)
-    {
-        return;
-    }
-
-    metadata->record_number = 0;
-    metadata->has_standard_information = false;
-    metadata->si = (standard_information){0};
-
-    metadata->file_names = NULL;
-    metadata->file_name_count = 0;
-    metadata->file_name_capacity = 0;
-}
+void record_metadata_init(record_metadata *metadata);
 
 /**
  * @brief Free memory allocated to record_metadata fields.
  * @param metadata Pointer to the metadata struct to free.
  */
-void record_metadata_free(record_metadata *metadata)
-{
-    if (metadata == NULL)
-    {
-        return;
-    }
-
-    free(metadata->file_names);
-
-    metadata->file_names = NULL;
-    metadata->file_name_count = 0;
-    metadata->file_name_capacity = 0;
-}
+void record_metadata_free(record_metadata *metadata);
 
 /**
  * @brief Add a new file_name_information struct to record_metadata.
@@ -147,49 +121,6 @@ void record_metadata_free(record_metadata *metadata)
  * @param fn Pointer to the file name information struct to add to record metadata.
  * @return true if successfully added file name, false otherwise.
  */
-bool record_metadata_add_file_name(record_metadata *metadata, const file_name_information *fn)
-{
-    if (metadata == NULL || fn == NULL)
-    {
-        return false;
-    }
-
-    if (metadata->file_name_count >= metadata->file_name_capacity)
-    {
-        uint32_t new_capacity;
-
-        if (metadata->file_name_capacity == 0)
-        {
-            new_capacity = 1;
-        }
-        else
-        {
-            if (metadata->file_name_capacity > UINT32_MAX / 2)
-            {
-                return false;
-            }
-
-            new_capacity = metadata->file_name_capacity * 2;
-        }
-
-        file_name_information *new_file_names = realloc(
-            metadata->file_names,
-            (size_t)new_capacity * sizeof(file_name_information)
-        );
-
-        if (new_file_names == NULL)
-        {
-            return false;
-        }
-
-        metadata->file_names = new_file_names;
-        metadata->file_name_capacity = new_capacity;
-    }
-
-    metadata->file_names[metadata->file_name_count] = *fn;
-    metadata->file_name_count++;
-
-    return true;
-}
+bool record_metadata_add_file_name(record_metadata *metadata, const file_name_information *fn);
 
 #endif
