@@ -247,18 +247,35 @@ static bool rule_zeroed_timestamp(const record_metadata *metadata)
 
 static bool rule_identical_timestamps(const record_metadata *metadata)
 {
-    if (metadata == NULL || !metadata->has_standard_information || !metadata->has_file_name_information)
+    if (metadata == NULL || !metadata->has_standard_information)
     {
         return false;
     }
 
-    return
-        timestamp_equal(metadata->si.creation_time, metadata->si.modified_time) &&
-        timestamp_equal(metadata->si.modified_time, metadata->si.mft_modified_time) &&
-        timestamp_equal(metadata->si.mft_modified_time, metadata->si.accessed_time) &&
+    if (!timestamp_equal(metadata->si.creation_time, metadata->si.modified_time) ||
+        !timestamp_equal(metadata->si.modified_time, metadata->si.mft_modified_time) ||
+        !timestamp_equal(metadata->si.mft_modified_time, metadata->si.accessed_time))
+    {
+        return false;
+    }
 
-        timestamp_equal(metadata->fn.creation_time, metadata->si.creation_time) &&
-        timestamp_equal(metadata->fn.modified_time, metadata->si.modified_time) &&
-        timestamp_equal(metadata->fn.mft_modified_time, metadata->si.mft_modified_time) &&
-        timestamp_equal(metadata->fn.accessed_time, metadata->si.accessed_time);
+    for (uint32_t i = 0; i < metadata->file_name_count; i++)
+    {
+        const file_name_information *fn = &metadata->file_names[i];
+
+        if (!fn->is_usable)
+        {
+            continue;
+        }
+
+        if (timestamp_equal(fn->creation_time, metadata->si.creation_time) &&
+            timestamp_equal(fn->modified_time, metadata->si.modified_time) &&
+            timestamp_equal(fn->mft_modified_time, metadata->si.mft_modified_time) &&
+            timestamp_equal(fn->accessed_time, metadata->si.accessed_time))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
