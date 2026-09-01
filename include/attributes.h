@@ -70,6 +70,7 @@ typedef struct
     uint8_t filename_length;    /** 0x40 */
     uint8_t filename_namespace; /** 0x41 */
     const uint8_t *filename;
+    bool is_usable;
 } file_name_information;
 
 /**
@@ -82,9 +83,9 @@ typedef struct
     bool has_standard_information;
     standard_information si;
 
-    bool has_file_name_information;
-    bool has_usable_file_name_information;
-    file_name_information fn;
+    file_name_information *file_names;
+    uint32_t file_name_count;
+    uint32_t file_name_capacity;
 } record_metadata;
 
 /**
