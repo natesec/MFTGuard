@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
     printf("\n");
 
-    printf("SI/FN mismatches: %llu\n", (unsigned long long)rule_counts[RULE_SN_FN_MISMATCH]);
+    printf("SI/FN mismatches: %llu\n", (unsigned long long)rule_counts[RULE_SI_FN_MISMATCH]);
     printf("Timestamp rollbacks: %llu\n", (unsigned long long)rule_counts[RULE_TIMESTAMP_ROLLBACK]);
     printf("Zeroed timestamps: %llu\n", (unsigned long long)rule_counts[RULE_ZEROED_TIMESTAMP]);
     printf("Identical timestamps: %llu\n", (unsigned long long)rule_counts[RULE_IDENTICAL_TIMESTAMPS]);

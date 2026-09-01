@@ -51,7 +51,7 @@ uint32_t rules_evaluate(const record_metadata *metadata)
 
     if (rule_si_fn_mismatch_count >= SI_FN_MISMATCH_THRESHOLD)
     {
-        rule_flags |= RULE_FLAG(RULE_SN_FN_MISMATCH);
+        rule_flags |= RULE_FLAG(RULE_SI_FN_MISMATCH);
     }
 
     uint32_t rule_timestamp_rollback_count = rule_timestamp_rollback(metadata);
@@ -86,7 +86,7 @@ bool rules_should_report(uint32_t rule_flags)
         return true;
     }
 
-    if ((rule_flags & RULE_FLAG(RULE_SN_FN_MISMATCH)) && (rule_flags & RULE_FLAG(RULE_ZEROED_TIMESTAMP)))
+    if ((rule_flags & RULE_FLAG(RULE_SI_FN_MISMATCH)) && (rule_flags & RULE_FLAG(RULE_ZEROED_TIMESTAMP)))
     {
         return true;
     }
@@ -96,7 +96,7 @@ bool rules_should_report(uint32_t rule_flags)
         return true;
     }
 
-    if ((rule_flags & RULE_FLAG(RULE_SN_FN_MISMATCH)) && (rule_flags & RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS)))
+    if ((rule_flags & RULE_FLAG(RULE_SI_FN_MISMATCH)) && (rule_flags & RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS)))
     {
         return true;
     }
