@@ -161,12 +161,6 @@ bool attributes_walk(
 
         case ATTRIBUTE_TYPE_FILE_NAME:
 
-            if (metadata->has_file_name_information)
-            {
-                fprintf(stderr, ERROR_MARKER "record contains multiple FN structures\n");
-                break;
-            }
-
             if (header.non_resident != 0)
             {
                 fprintf(stderr, ERROR_MARKER "$FN is non-resident\n");
@@ -194,22 +188,21 @@ bool attributes_walk(
 
             value = record + offset + resident_header.value_offset;
 
-            /** file_name_information fn; **/
+            file_name_information fn;
 
-            if (!attribute_parse_file_name(value, resident_header.value_length, &metadata->fn))
+            if (!attribute_parse_file_name(value, resident_header.value_length, &fn))
             {
                 return false;
             }
 
-            metadata->has_file_name_information = true;
-
             /** TODO: stricter criterion for what constitutes a usable file_name */
-            if (!metadata->fn.filename_length > 0)
-            {
-                metadata->has_usable_file_name_information = false;
-            }
+            fn.is_usable = (fn.filename_length > 0);
 
-            metadata->has_usable_file_name_information = true;
+            if (!record_metadata_add_file_name(metadata, &fn))
+            {
+                fprintf(stderr, ERROR_MARKER "failed to store file name information\n");
+                return false;
+            }
 
             break;
 
