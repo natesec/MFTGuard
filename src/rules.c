@@ -123,36 +123,51 @@ void rules_count(uint32_t rule_flags, uint64_t *rule_counts)
 static uint32_t rule_si_fn_mismatch(const record_metadata *metadata)
 {
     if (metadata == NULL ||
-        !metadata->has_standard_information ||
-        !metadata->has_file_name_information ||
-        !metadata->has_usable_file_name_information)
+        !metadata->has_standard_information)
     {
         return 0;
     }
 
-    uint32_t mismatches = 0;
+    uint32_t mismatch_count = 0;
 
-    if (!timestamp_equal(metadata->si.creation_time, metadata->fn.creation_time))
+    for (uint32_t i = 0; i < metadata->file_name_count; i++)
     {
-        mismatches++;
+        const file_name_information *fn = &metadata->file_names[i];
+
+        if (!fn->is_usable)
+        {
+            continue;
+        }
+
+        uint32_t mismatches = 0;
+
+        if (!timestamp_equal(metadata->si.creation_time, fn->creation_time))
+        {
+            mismatches++;
+        }
+
+        if (!timestamp_equal(metadata->si.modified_time, fn->modified_time))
+        {
+            mismatches++;
+        }
+
+        if (!timestamp_equal(metadata->si.mft_modified_time, fn->mft_modified_time))
+        {
+            mismatches++;
+        }
+
+        if (!timestamp_equal(metadata->si.accessed_time, fn->accessed_time))
+        {
+            mismatches++;
+        }
+
+        if (mismatches > 0)
+        {
+            mismatch_count++;
+        }
     }
 
-    if (!timestamp_equal(metadata->si.modified_time, metadata->fn.modified_time))
-    {
-        mismatches++;
-    }
-
-    if (!timestamp_equal(metadata->si.mft_modified_time, metadata->fn.mft_modified_time))
-    {
-        mismatches++;
-    }
-
-    if (!timestamp_equal(metadata->si.accessed_time, metadata->fn.accessed_time))
-    {
-        mismatches++;
-    }
-
-    return mismatches;
+    return mismatch_count;
 }
 
 static uint32_t rule_timestamp_rollback(const record_metadata *metadata)
