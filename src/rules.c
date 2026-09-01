@@ -139,29 +139,22 @@ static uint32_t rule_si_fn_mismatch(const record_metadata *metadata)
             continue;
         }
 
-        uint32_t mismatches = 0;
-
         if (!timestamp_equal(metadata->si.creation_time, fn->creation_time))
         {
-            mismatches++;
+            mismatch_count++;
         }
 
         if (!timestamp_equal(metadata->si.modified_time, fn->modified_time))
         {
-            mismatches++;
+            mismatch_count++;
         }
 
         if (!timestamp_equal(metadata->si.mft_modified_time, fn->mft_modified_time))
         {
-            mismatches++;
+            mismatch_count++;
         }
 
         if (!timestamp_equal(metadata->si.accessed_time, fn->accessed_time))
-        {
-            mismatches++;
-        }
-
-        if (mismatches > 0)
         {
             mismatch_count++;
         }
@@ -189,24 +182,22 @@ static uint32_t rule_timestamp_rollback(const record_metadata *metadata)
             continue;
         }
 
-        uint32_t rollbacks = 0;
-
         /** TODO: determine forensic significance of creation times */
         /** if (metadata->si.creation_time < metadata->fn.creation_time) */
 
         if (metadata->si.modified_time < fn->modified_time)
         {
-            rollbacks++;
+            rollback_count++;
         }
 
         if (metadata->si.mft_modified_time < fn->mft_modified_time)
         {
-            rollbacks++;
+            rollback_count++;
         }
 
         if (metadata->si.accessed_time < fn->accessed_time)
         {
-            rollbacks++;
+            rollback_count++;
         }
     }
 
