@@ -104,6 +104,22 @@ bool rules_should_report(uint32_t rule_flags)
     return false;
 }
 
+void rules_count(uint32_t rule_flags, uint64_t *rule_counts)
+{
+    if (rule_counts == NULL)
+    {
+        return;
+    }
+
+    for (rule_id id = 0; id < RULE_COUNT; id++)
+    {
+        if (rule_flags & RULE_FLAG(id))
+        {
+            rule_counts[id]++;
+        }
+    }
+}
+
 static uint32_t rule_si_fn_mismatch(const record_metadata *metadata)
 {
     if (metadata == NULL ||

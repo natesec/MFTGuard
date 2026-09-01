@@ -39,9 +39,16 @@ uint32_t rules_evaluate(const record_metadata *metadata);
 
 /**
  * @brief Determines whether a combination of rule flags constitutes a record report.
- * @param uint32_t rule flags bitmask containing all triggered detections rules.
+ * @param rule_flags uint32_t rule flags bitmask containing all triggered detections rules.
  * @return true if the record should be reported, false otherwise.
  */
 bool rules_should_report(uint32_t rule_flags);
+
+/**
+ * @brief Stores the count of each rule detected, disregarding further evaluation.
+ * @param rule_flags uin32_t rule flags bitmask containing all triggered detection rules.
+ * @param rule_counts Pointer to an array that stores the count for each rule fired.
+ */
+void rules_count(uint32_t rule_flags, uint64_t *rule_counts);
 
 #endif

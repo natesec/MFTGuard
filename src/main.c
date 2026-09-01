@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     /** TESTING */
     //mft.record_number = 625893;
-    uint64_t test_record_limit = 30;
+    uint64_t test_record_limit = 100;
     printf(
         MESSAGE_MARKER "Scanning first %llu records...\n",
         (unsigned long long)test_record_limit
@@ -56,6 +56,8 @@ int main(int argc, char *argv[])
     uint64_t records_reserved = 0;
     uint64_t records_skipped = 0;
     uint64_t records_flagged = 0;
+
+    uint64_t rule_counts[RULE_COUNT] = {0};
 
     /* while (mft.record_number < mft.record_count) */
     while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
@@ -94,6 +96,8 @@ int main(int argc, char *argv[])
 
         uint32_t rule_flags = rules_evaluate(&record.metadata);
 
+        rules_count(rule_flags, rule_counts);
+
         if (rules_should_report(rule_flags))
         {
             records_flagged++;
@@ -113,7 +117,14 @@ int main(int argc, char *argv[])
     printf("Reserved Records: %llu\n", (unsigned long long)records_reserved);
     printf("Records skipped: %llu\n", (unsigned long long)records_skipped);
 
-    printf("\n\n");
+    printf("\n");
+
+    printf("SI/FN mismatches: %llu\n", (unsigned long long)rule_counts[RULE_SN_FN_MISMATCH]);
+    printf("Timestamp rollbacks: %llu\n", (unsigned long long)rule_counts[RULE_TIMESTAMP_ROLLBACK]);
+    printf("Zeroed timestamps: %llu\n", (unsigned long long)rule_counts[RULE_ZEROED_TIMESTAMP]);
+    printf("Identical timestamps: %llu\n", (unsigned long long)rule_counts[RULE_IDENTICAL_TIMESTAMPS]);
+
+    printf("\n");
 
     printf(SUCCESS_MARKER "MFT closed successfully\n");
 
