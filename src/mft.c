@@ -175,14 +175,14 @@ mft_record_status mft_parse_record(mft_file *mft, mft_record *record, uint32_t s
         return MFT_RECORD_RESERVED;
     }
 
+    if ((record->header.flags & MFT_RECORD_FLAG_IN_USE) == 0)
+    {
+        return MFT_RECORD_UNUSED;
+    }
+
     if (!mft_validate_record_header(mft, record))
     {
         return MFT_RECORD_INVALID;
-    }
-
-    if ((record->header.flags && MFT_RECORD_FLAG_IN_USE) == 0)
-    {
-        return MFT_RECORD_UNUSED;
     }
 
     if (!fixup_apply(
