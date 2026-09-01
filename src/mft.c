@@ -149,7 +149,8 @@ mft_record_status mft_parse_record(mft_file *mft, mft_record *record, uint32_t s
     }
 
     // Reset record_metadata structure field in record.
-    record->metadata = (record_metadata){0};
+    record_metadata_free(&record->metadata);
+    record_metadata_init(&record->metadata);
 
     memcpy(record->header.signature, mft->buffer + 0x0, 4);
 

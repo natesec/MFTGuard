@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 /** NTFS attribute type that marks the end of the attribute list. */
 #define ATTRIBUTE_TYPE_END 0xFFFFFFFF
@@ -101,5 +102,43 @@ bool attributes_walk(
     uint16_t attribute_offset,
     record_metadata *metadata
 );
+
+/**
+ * @brief Establish a known empty state for record_metadata struct.
+ * @param metadata Pointer to the metadata struct to initialize.
+ */
+void record_metadata_init(record_metadata *metadata)
+{
+    if (metadata == NULL)
+    {
+        return;
+    }
+
+    metadata->record_number = 0;
+    metadata->has_standard_information = false;
+    metadata->si = (standard_information){0};
+
+    metadata->file_names = NULL;
+    metadata->file_name_count = 0;
+    metadata->file_name_capacity = 0;
+}
+
+/**
+ * @brief Free memory allocated to record_metadata fields.
+ * @param metadata Pointer to the metadata struct to free.
+ */
+void record_metadata_free(record_metadata *metadata)
+{
+    if (metadata == NULL)
+    {
+        return;
+    }
+
+    free(metadata->file_names);
+
+    metadata->file_names = NULL;
+    metadata->file_name_count = 0;
+    metadata->file_name_capacity = 0;
+}
 
 #endif
