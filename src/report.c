@@ -26,39 +26,49 @@ void report_record(const mft_record *record, uint32_t rule_flags)
 
     printf(SUCCESS_MARKER "SUSPICIOUS RECORD: %llu\n", (unsigned long long)record->record_number);
 
-    if (record->metadata.has_file_name_information && record->metadata.has_usable_file_name_information)
-    {
-        wprintf(
-            L"[+] Filename: %.*ls\n",
-            record->metadata.fn.filename_length,
-            (const wchar_t *)record->metadata.fn.filename
-        );
-    }
-
     printf("\n");
 
     printf(SUCCESS_MARKER "$STANDARD_INFORMATION\n");
     report_timestamp("Created:", record->metadata.si.creation_time);
     report_timestamp("Modified:", record->metadata.si.modified_time);
     report_timestamp("MFT Modified:", record->metadata.si.mft_modified_time);
-    report_timestamp("Accessed:", record->metadata.si.modified_time);
+    report_timestamp("Accessed:", record->metadata.si.accessed_time);
 
     printf("\n");
 
-    if (record->metadata.has_file_name_information && record->metadata.has_usable_file_name_information)
+    if (record->metadata.file_name_count > 0)
     {
-        printf(SUCCESS_MARKER "$FILE_NAME_INFORMATION\n");
-        report_timestamp("Created:", record->metadata.fn.creation_time);
-        report_timestamp("Modified:", record->metadata.fn.modified_time);
-        report_timestamp("MFT Modified:", record->metadata.fn.mft_modified_time);
-        report_timestamp("Accessed:", record->metadata.fn.modified_time);
+        printf(SUCCESS_MARKER "$FILE_NAME_INFORMATION (%u)\n", record->metadata.file_name_count);
 
-        printf("\n");
+        for (uint32_t i = 0; i < record->metadata.file_name_count; i++)
+        {
+            const file_name_information *fn = &record->metadata.file_names[i];
+
+            if (!fn->is_usable)
+            {
+                continue;
+            }
+
+            printf(SUCCESS_MARKER "FILENAME #%u\n", i + 1);
+
+            wprintf(
+                L"[+] Filename: %.*ls\n",
+                fn->filename_length,
+                (const wchar_t *)fn->filename
+            );
+
+            report_timestamp("Created:", fn->creation_time);
+            report_timestamp("Modified:", fn->modified_time);
+            report_timestamp("MFT Modified:", fn->mft_modified_time);
+            report_timestamp("Accessed:", fn->accessed_time);
+
+            printf("\n");
+        }
     }
 
     printf(SUCCESS_MARKER "DETECTION RULES TRIGGERED:\n");
 
-    if (rule_flags & RULE_FLAG(RULE_SN_FN_MISMATCH))
+    if (rule_flags & RULE_FLAG(RULE_SI_FN_MISMATCH))
     {
         printf(RULE_MARKER "SI/FN mismatch detected\n");
     }
