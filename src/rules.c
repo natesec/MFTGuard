@@ -164,22 +164,20 @@ static uint32_t rule_timestamp_rollback(const record_metadata *metadata)
 
     uint32_t rollbacks = 0;
 
-    if (metadata->si.modified_time < metadata->si.creation_time)
+    /** TODO: determine forensic significance of creation times */
+    /** if (metadata->si.creation_time < metadata->fn.creation_time) */
+
+    if (metadata->si.modified_time < metadata->fn.modified_time)
     {
         rollbacks++;
     }
 
-    if (metadata->si.mft_modified_time < metadata->si.modified_time)
+    if (metadata->si.mft_modified_time < metadata->fn.mft_modified_time)
     {
         rollbacks++;
     }
 
-    if (metadata->si.accessed_time < metadata->si.creation_time)
-    {
-        rollbacks++;
-    }
-
-    if (metadata->fn.modified_time < metadata->fn.creation_time)
+    if (metadata->si.accessed_time < metadata->fn.accessed_time)
     {
         rollbacks++;
     }
