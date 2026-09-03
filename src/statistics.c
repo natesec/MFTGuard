@@ -18,7 +18,7 @@ void statistics_collect(statistics *stats,
     uint32_t rule_flags,
     bool should_report)
 {
-    if (stats == NULL || metadata == NULL)
+    if (stats == NULL)
     {
         return;
     }
@@ -48,6 +48,11 @@ void statistics_collect(statistics *stats,
     default:
         stats->records_skipped++;
         break;
+    }
+
+    if (status != MFT_RECORD_USED)
+    {
+        return;
     }
 
     if (should_report)
