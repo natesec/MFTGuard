@@ -109,23 +109,6 @@ int main(int argc, char *argv[])
 
     mft_close(&mft);
 
-    printf("\n");
-
-    printf("Records processed: %llu\n", (unsigned long long)records_processed);
-    printf("Records flagged: %llu\n", (unsigned long long)records_flagged);
-    printf("Unused records: %llu\n", (unsigned long long)records_unused);
-    printf("Reserved Records: %llu\n", (unsigned long long)records_reserved);
-    printf("Records skipped: %llu\n", (unsigned long long)records_skipped);
-
-    printf("\n");
-
-    printf("SI/FN mismatches: %llu\n", (unsigned long long)rule_counts[RULE_SI_FN_MISMATCH]);
-    printf("Timestamp rollbacks: %llu\n", (unsigned long long)rule_counts[RULE_TIMESTAMP_ROLLBACK]);
-    printf("Zeroed timestamps: %llu\n", (unsigned long long)rule_counts[RULE_ZEROED_TIMESTAMP]);
-    printf("Identical timestamps: %llu\n", (unsigned long long)rule_counts[RULE_IDENTICAL_TIMESTAMPS]);
-
-    printf("\n");
-
     printf(SUCCESS_MARKER "MFT closed successfully\n");
 
     return 0;
