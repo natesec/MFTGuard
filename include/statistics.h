@@ -19,6 +19,11 @@ typedef struct
     uint64_t records_invalid;
     uint64_t records_skipped;
 
+    uint64_t file_name_records;
+    uint64_t multiple_file_name_records;
+    uint64_t total_file_names;
+    uint64_t max_file_names_per_record;
+
     uint64_t si_fn_mismatch_count;
     uint64_t timestamp_rollback_count;
     uint64_t zeroed_timestamp_count;

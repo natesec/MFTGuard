@@ -55,6 +55,22 @@ void statistics_collect(statistics *stats,
         return;
     }
 
+    if (metadata->file_name_capacity > 0)
+    {
+        stats->file_name_records++;
+        stats->total_file_names += metadata->file_name_capacity;
+
+        if (metadata->file_name_capacity > 1)
+        {
+            stats->multiple_file_name_records++;
+        }
+
+        if (metadata->file_name_capacity > stats->max_file_names_per_record)
+        {
+            stats->max_file_names_per_record = metadata->file_name_capacity;
+        }
+    }
+
     if (should_report)
     {
         stats->records_flagged++;
@@ -89,7 +105,15 @@ void statistics_print(const statistics *stats)
     printf("Records flagged: %llu\n", (unsigned long long)stats->records_flagged);
     printf("Unused records: %llu\n", (unsigned long long)stats->records_unused);
     printf("Reserved Records: %llu\n", (unsigned long long)stats->records_reserved);
+    printf("Invalid Records: %llu\n", (unsigned long long)stats->records_invalid);
     printf("Records skipped: %llu\n", (unsigned long long)stats->records_skipped);
+
+    printf("\n");
+
+    printf("Records with FILE_NAME attributes: %llu\n", (unsigned long long)stats->file_name_records);
+    printf("Records with multiple FILE_NAME attributes: %llu\n", (unsigned long long)stats->multiple_file_name_records);
+    printf("Total FILE_NAME attributes: %llu\n", (unsigned long long)stats->total_file_names);
+    printf("Maximum FILE_NAME attributes in one record: %llu\n", (unsigned long long)stats->max_file_names_per_record);
 
     printf("\n");
 
