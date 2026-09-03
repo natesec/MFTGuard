@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "rules.h"
 #include "report.h"
+#include "statistics.h"
 
 int main(int argc, char *argv[])
 {
@@ -51,20 +52,15 @@ int main(int argc, char *argv[])
         (unsigned long long)mft.record_count
     );
 
-    uint64_t records_processed = 0;
-    uint64_t records_unused = 0;
-    uint64_t records_reserved = 0;
-    uint64_t records_skipped = 0;
-    uint64_t records_flagged = 0;
-
-    uint64_t rule_counts[RULE_COUNT] = {0};
+    statistics stats;
+    statistics_init(&stats);
 
     /* while (mft.record_number < mft.record_count) */
     while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
     {
         if (!mft_read_record(&mft))
         {
-            records_skipped++;
+            statistics_collect(&stats, NULL, MFT_RECORD_SKIPPED, RULE_NONE, false);
             mft.record_number++;
             continue;
         }
@@ -73,39 +69,40 @@ int main(int argc, char *argv[])
 
         if (status == MFT_RECORD_INVALID)
         {
-            records_skipped++;
+            statistics_collect(&stats, NULL, status, RULE_NONE, false);
             mft.record_number++;
             continue;
         }
 
         if (status == MFT_RECORD_UNUSED)
         {
-            records_unused++;
+            statistics_collect(&stats, NULL, status, RULE_NONE, false);
             mft.record_number++;
             continue;
         }
 
         if (status == MFT_RECORD_RESERVED)
         {
-            records_reserved++;
+            statistics_collect(&stats, NULL, status, RULE_NONE, false);
             mft.record_number++;
             continue;
         }
 
-        records_processed++;
 
         uint32_t rule_flags = rules_evaluate(&record.metadata);
+        bool should_report = rules_should_report(rule_flags);
 
-        rules_count(rule_flags, rule_counts);
+        statistics_collect(&stats, &record.metadata, status, rule_flags, should_report);
 
-        if (rules_should_report(rule_flags))
+        if (should_report)
         {
-            records_flagged++;
             //report_record(&record, rule_flags);
         }
 
         mft.record_number++;
     }
+
+    statistics_print(&stats);
 
     mft_close(&mft);
 

@@ -58,10 +58,11 @@ typedef struct
  */
 typedef enum
 {
-    MFT_RECORD_INVALID,
-    MFT_RECORD_UNUSED,
-    MFT_RECORD_RESERVED,
-    MFT_RECORD_USED
+    MFT_RECORD_INVALID,  /** Record was read but malformed or corrupt */
+    MFT_RECORD_UNUSED,   /** Valid record, not in-use */
+    MFT_RECORD_RESERVED, /** Reserved NTFS record */
+    MFT_RECORD_SKIPPED,  /** Failed to read record */
+    MFT_RECORD_USED      /** Record is eligible for rule evaluation */
 } mft_record_status;
 
 /**

@@ -12,11 +12,47 @@ void statistics_init(statistics *stats)
     *stats = (statistics){0};
 }
 
-void statistics_collect(statistics *stats, const record_metadata *metadata, uint32_t rule_flags)
+void statistics_collect(statistics *stats,
+    const record_metadata *metadata,
+    mft_record_status status,
+    uint32_t rule_flags,
+    bool should_report)
 {
     if (stats == NULL || metadata == NULL)
     {
         return;
+    }
+
+    switch (status)
+    {
+    case MFT_RECORD_USED:
+        stats->records_processed++;
+        break;
+    
+    case MFT_RECORD_UNUSED:
+        stats->records_unused++;
+        break;
+
+    case MFT_RECORD_RESERVED:
+        stats->records_reserved++;
+        break;
+
+    case MFT_RECORD_INVALID:
+        stats->records_invalid++;
+        break;
+
+    case MFT_RECORD_SKIPPED:
+        stats->records_skipped++;
+        break;
+
+    default:
+        stats->records_skipped++;
+        break;
+    }
+
+    if (should_report)
+    {
+        stats->records_flagged++;
     }
 
     if (rule_flags & RULE_FLAG(RULE_SI_FN_MISMATCH))
@@ -45,7 +81,7 @@ void statistics_print(const statistics *stats)
     printf("\n");
 
     printf("Records processed: %llu\n", (unsigned long long)stats->records_processed);
-    //printf("Records flagged: %llu\n", (unsigned long long)stats->records_flagged);
+    printf("Records flagged: %llu\n", (unsigned long long)stats->records_flagged);
     printf("Unused records: %llu\n", (unsigned long long)stats->records_unused);
     printf("Reserved Records: %llu\n", (unsigned long long)stats->records_reserved);
     printf("Records skipped: %llu\n", (unsigned long long)stats->records_skipped);
