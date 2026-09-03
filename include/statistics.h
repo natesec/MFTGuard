@@ -7,6 +7,9 @@
 #include "mft.h"
 #include "attributes.h"
 
+/** Temporary count attainted from clean sample. */
+#define STATISTICS_MAX_FILE_NAMES 8
+
 /**
  * @brief Represents aggregate statistical data.
  */
@@ -23,6 +26,8 @@ typedef struct
     uint64_t multiple_file_name_records;
     uint64_t total_file_names;
     uint64_t max_file_names_per_record;
+
+    uint64_t file_name_count_distribution[STATISTICS_MAX_FILE_NAMES + 1];
 
     uint64_t si_fn_mismatch_count;
     uint64_t timestamp_rollback_count;

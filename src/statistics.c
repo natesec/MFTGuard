@@ -55,20 +55,31 @@ void statistics_collect(statistics *stats,
         return;
     }
 
-    if (metadata->file_name_capacity > 0)
+    uint64_t fn_count = metadata->file_name_count;
+
+    if (fn_count > 0)
     {
         stats->file_name_records++;
-        stats->total_file_names += metadata->file_name_capacity;
+        stats->total_file_names += fn_count;
 
-        if (metadata->file_name_capacity > 1)
+        if (fn_count > 1)
         {
             stats->multiple_file_name_records++;
         }
 
-        if (metadata->file_name_capacity > stats->max_file_names_per_record)
+        if (fn_count > stats->max_file_names_per_record)
         {
-            stats->max_file_names_per_record = metadata->file_name_capacity;
+            stats->max_file_names_per_record = fn_count;
         }
+    }
+
+    if (fn_count <= STATISTICS_MAX_FILE_NAMES)
+    {
+        stats->file_name_count_distribution[fn_count]++;
+    }
+    else
+    {
+        stats->file_name_count_distribution[STATISTICS_MAX_FILE_NAMES + 1]++;
     }
 
     if (should_report)
@@ -114,6 +125,19 @@ void statistics_print(const statistics *stats)
     printf("Records with multiple FILE_NAME attributes: %llu\n", (unsigned long long)stats->multiple_file_name_records);
     printf("Total FILE_NAME attributes: %llu\n", (unsigned long long)stats->total_file_names);
     printf("Maximum FILE_NAME attributes in one record: %llu\n", (unsigned long long)stats->max_file_names_per_record);
+
+    printf("\n");
+
+    printf("FILE_NAME distribution\n");
+    for (uint32_t i = 0; i <= STATISTICS_MAX_FILE_NAMES; i++)
+    {
+        printf(
+            "%u FILE_NAME%s: %llu\n",
+            i,
+            (i == 1) ? "" : "s",
+            (unsigned long long)stats->file_name_count_distribution[i]
+        );
+    }
 
     printf("\n");
 
