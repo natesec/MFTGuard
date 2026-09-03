@@ -16,6 +16,7 @@ add_executable(MFTGuard
     src/rules.c
     src/report.c
     src/utils.c
+    src/statistics.c
     third_party/cjson/cJSON.c
 )
 
