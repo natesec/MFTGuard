@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     /** TESTING */
     //mft.record_number = 625893;
-    //uint64_t test_record_limit = 100000;
+    uint64_t test_record_limit = 100000;
     printf(
         MESSAGE_MARKER "Scanning %llu records...\n",
         (unsigned long long)mft.record_count
@@ -60,8 +60,7 @@ int main(int argc, char *argv[])
     uint64_t rule_counts[RULE_COUNT] = {0};
 
     /* while (mft.record_number < mft.record_count) */
-    /* while (mft.record_number < mft.record_count && mft.record_number < test_record_limit) */
-    while (mft.record_number < mft.record_count)
+    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
     {
         if (!mft_read_record(&mft))
         {
