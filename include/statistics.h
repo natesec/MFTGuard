@@ -33,6 +33,22 @@ typedef struct
     uint64_t timestamp_rollback_count;
     uint64_t zeroed_timestamp_count;
     uint64_t identical_timestamp_count;
+
+    uint64_t creation_si_before_fn;
+    uint64_t creation_si_equal_fn;
+    uint64_t creation_si_after_fn;
+
+    uint64_t modified_si_before_fn;
+    uint64_t modified_si_equal_fn;
+    uint64_t modified_si_after_fn;
+
+    uint64_t mft_modified_si_before_fn;
+    uint64_t mft_modified_si_equal_fn;
+    uint64_t mft_modified_si_after_fn;
+
+    uint64_t accessed_si_before_fn;
+    uint64_t accessed_si_equal_fn;
+    uint64_t accessed_si_after_fn;
 } statistics;
 
 /**
