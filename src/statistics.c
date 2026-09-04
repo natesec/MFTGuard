@@ -2,6 +2,13 @@
 
 #include "rules.h"
 
+#define STATISTICS_DELTA_SECOND 1000000000ULL
+#define STATISTICS_DELTA_MINUTE 60000000000ULL
+#define STATISTICS_DELTA_HOUR 3600000000000ULL
+#define STATISTICS_DELTA_DAY 86400000000000ULL
+#define STATISTICS_DELTA_WEEK 604800000000000ULL
+#define STATISTICS_DELTA_MONTH 2629800000000000ULL
+
 /**
  * @brief Update aggregate statistics for a timestamp delta.
  * @param delta calculated timestamp delta in 100-ns units.
@@ -45,6 +52,13 @@ static void statistics_print_delta(
     uint64_t count
 );
 
+/**
+ * @brief Convert a signed delta value into a magnitude.
+ * @param delta calculated by statistics_timestamp_delta.
+ * @return uint64_t magnitude value from delta.
+ */
+static uint64_t statistics_delta_magnitude(int64_t delta);
+
 void statistics_init(statistics *stats)
 {
     if (stats == NULL)
@@ -54,6 +68,46 @@ void statistics_init(statistics *stats)
 
     *stats = (statistics){0};
 }
+
+/**
+ * @brief Update cummulative delta threshold values in the statistics struct.
+ * @param magnitude delta magnitude returned by helper function.
+ * @param over_1s Pointer to the over 1 second field in the stats struct.
+ * @param over_1m Pointer to the over 1 min field in the stats struct.
+ * @param over_1h Pointer to the over 1 hour field in the stats struct.
+ * @param over_1d Pointer to the over 1 day field in the stats struct.
+ * @param over_1w Pointer to the over 1 week field in the stats struct.
+ * @param over_30d Pointer to the over 30 days field in the stats struct.
+ */
+static void statistics_update_delta_thresholds(
+    uint64_t magnitude,
+    uint64_t *over_1s,
+    uint64_t *over_1m,
+    uint64_t *over_1h,
+    uint64_t *over_1d,
+    uint64_t *over_1w,
+    uint64_t *over_30d
+);
+
+/**
+ * @brief Print the cummulative delta thresholds.
+ * @param label Pointer to the label to be prepended to the print statement.
+ * @param over_1s to the over 1 second field in the stats struct.
+ * @param over_1m the over 1 min field in the stats struct.
+ * @param over_1h the over 1 hour field in the stats struct.
+ * @param over_1d the over 1 day field in the stats struct.
+ * @param over_1w the over 1 week field in the stats struct.
+ * @param over_30d the over 30 days field in the stats struct.
+ */
+static void statistics_print_delta_thresholds(
+    const char *label,
+    uint64_t over_1s,
+    uint64_t over_1m,
+    uint64_t over_1h,
+    uint64_t over_1d,
+    uint64_t over_1w,
+    uint64_t over_30d
+);
 
 void statistics_collect(statistics *stats,
     const record_metadata *metadata,
@@ -98,7 +152,7 @@ void statistics_collect(statistics *stats,
         return;
     }
 
-    uint64_t fn_count = metadata->file_name_count;
+    uint32_t fn_count = metadata->file_name_count;
 
     if (fn_count > 0)
     {
@@ -174,6 +228,18 @@ void statistics_collect(statistics *stats,
             &stats->creation_delta_count
         );
 
+        uint64_t creation_magnitude = statistics_delta_magnitude(creation_delta);
+
+        statistics_update_delta_thresholds(
+            creation_magnitude,
+            &stats->creation_delta_over_1s,
+            &stats->creation_delta_over_1m,
+            &stats->creation_delta_over_1h,
+            &stats->creation_delta_over_1d,
+            &stats->creation_delta_over_1w,
+            &stats->creation_delta_over_30d
+        );
+
         if (metadata->si.creation_time < fn->creation_time)
         {
             stats->creation_si_before_fn++;
@@ -200,6 +266,18 @@ void statistics_collect(statistics *stats,
             &stats->modified_delta_max,
             &stats->modified_delta_sum,
             &stats->modified_delta_count
+        );
+
+        uint64_t modified_magnitude = statistics_delta_magnitude(modified_delta);
+
+        statistics_update_delta_thresholds(
+            modified_magnitude,
+            &stats->modified_delta_over_1s,
+            &stats->modified_delta_over_1m,
+            &stats->modified_delta_over_1h,
+            &stats->modified_delta_over_1d,
+            &stats->modified_delta_over_1w,
+            &stats->modified_delta_over_30d
         );
 
         if (metadata->si.modified_time < fn->modified_time)
@@ -230,6 +308,18 @@ void statistics_collect(statistics *stats,
             &stats->mft_modified_delta_count
         );
 
+        uint64_t mft_modified_magnitude = statistics_delta_magnitude(mft_modified_delta);
+
+        statistics_update_delta_thresholds(
+            mft_modified_magnitude,
+            &stats->mft_modified_delta_over_1s,
+            &stats->mft_modified_delta_over_1m,
+            &stats->mft_modified_delta_over_1h,
+            &stats->mft_modified_delta_over_1d,
+            &stats->mft_modified_delta_over_1w,
+            &stats->mft_modified_delta_over_30d
+        );
+
         if (metadata->si.mft_modified_time < fn->mft_modified_time)
         {
             stats->mft_modified_si_before_fn++;
@@ -256,6 +346,18 @@ void statistics_collect(statistics *stats,
             &stats->accessed_delta_max,
             &stats->accessed_delta_sum,
             &stats->accessed_delta_count
+        );
+
+        uint64_t accessed_magnitude = statistics_delta_magnitude(accessed_delta);
+
+        statistics_update_delta_thresholds(
+            accessed_magnitude,
+            &stats->accessed_delta_over_1s,
+            &stats->accessed_delta_over_1m,
+            &stats->accessed_delta_over_1h,
+            &stats->accessed_delta_over_1d,
+            &stats->accessed_delta_over_1w,
+            &stats->accessed_delta_over_30d
         );
 
         if (metadata->si.accessed_time < fn->accessed_time)
@@ -382,6 +484,48 @@ void statistics_print(const statistics *stats)
 
     printf("\n");
 
+    printf("SI/FN ABSOLUTE TIMESTAMP DELTA MAGNITUDES\n");
+    statistics_print_delta_thresholds(
+    "Creation",
+    stats->creation_delta_over_1s,
+    stats->creation_delta_over_1m,
+    stats->creation_delta_over_1h,
+    stats->creation_delta_over_1d,
+    stats->creation_delta_over_1w,
+    stats->creation_delta_over_30d
+    );
+
+    statistics_print_delta_thresholds(
+        "Modified",
+        stats->modified_delta_over_1s,
+        stats->modified_delta_over_1m,
+        stats->modified_delta_over_1h,
+        stats->modified_delta_over_1d,
+        stats->modified_delta_over_1w,
+        stats->modified_delta_over_30d
+    );
+
+    statistics_print_delta_thresholds(
+    "MFT Modified",
+    stats->mft_modified_delta_over_1s,
+    stats->mft_modified_delta_over_1m,
+    stats->mft_modified_delta_over_1h,
+    stats->mft_modified_delta_over_1d,
+    stats->mft_modified_delta_over_1w,
+    stats->mft_modified_delta_over_30d
+    );
+
+    statistics_print_delta_thresholds(
+    "Accessed",
+    stats->accessed_delta_over_1s,
+    stats->accessed_delta_over_1m,
+    stats->accessed_delta_over_1h,
+    stats->accessed_delta_over_1d,
+    stats->accessed_delta_over_1w,
+    stats->accessed_delta_over_30d
+    );
+
+    printf("\n");
 }
 
 static void statistics_update_delta(
@@ -445,5 +589,77 @@ static void statistics_print_delta(
         (long long)min,
         (long long)max,
         mean
+    );
+}
+
+static uint64_t statistics_delta_magnitude(int64_t delta)
+{
+    if (delta >= 0)
+    {
+        return (uint64_t)delta;
+    }
+
+    return (uint64_t)(-(delta + 1)) + 1;
+}
+
+static void statistics_update_delta_thresholds(
+    uint64_t magnitude,
+    uint64_t *over_1s,
+    uint64_t *over_1m,
+    uint64_t *over_1h,
+    uint64_t *over_1d,
+    uint64_t *over_1w,
+    uint64_t *over_30d)
+{
+    if (magnitude >= STATISTICS_DELTA_SECOND)
+    {
+        (*over_1s)++;
+    }
+
+    if (magnitude >= STATISTICS_DELTA_MINUTE)
+    {
+        (*over_1m)++;
+    }
+
+    if (magnitude >= STATISTICS_DELTA_HOUR)
+    {
+        (*over_1h)++;
+    }
+
+    if (magnitude >= STATISTICS_DELTA_DAY)
+    {
+        (*over_1d)++;
+    }
+
+    if (magnitude >= STATISTICS_DELTA_WEEK)
+    {
+        (*over_1w)++;
+    }
+
+    if (magnitude >= STATISTICS_DELTA_MONTH)
+    {
+        (*over_30d)++;
+    }
+}
+
+static void statistics_print_delta_thresholds(
+    const char *label,
+    uint64_t over_1s,
+    uint64_t over_1m,
+    uint64_t over_1h,
+    uint64_t over_1d,
+    uint64_t over_1w,
+    uint64_t over_30d)
+{
+    printf(
+        "%s: >1s=%llu, >1m=%llu, >1h=%llu, "
+        ">1d=%llu, >7d=%llu, >30d=%llu\n",
+        label,
+        (unsigned long long)over_1s,
+        (unsigned long long)over_1m,
+        (unsigned long long)over_1h,
+        (unsigned long long)over_1d,
+        (unsigned long long)over_1w,
+        (unsigned long long)over_30d
     );
 }

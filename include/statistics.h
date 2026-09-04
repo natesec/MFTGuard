@@ -55,20 +55,48 @@ typedef struct
     int64_t creation_delta_sum;
     uint64_t creation_delta_count;
 
+    uint64_t creation_delta_over_1s;
+    uint64_t creation_delta_over_1m;
+    uint64_t creation_delta_over_1h;
+    uint64_t creation_delta_over_1d;
+    uint64_t creation_delta_over_1w;
+    uint64_t creation_delta_over_30d;
+
     int64_t modified_delta_min;
     int64_t modified_delta_max;
     int64_t modified_delta_sum;
     uint64_t modified_delta_count;
+
+    uint64_t modified_delta_over_1s;
+    uint64_t modified_delta_over_1m;
+    uint64_t modified_delta_over_1h;
+    uint64_t modified_delta_over_1d;
+    uint64_t modified_delta_over_1w;
+    uint64_t modified_delta_over_30d;
 
     int64_t mft_modified_delta_min;
     int64_t mft_modified_delta_max;
     int64_t mft_modified_delta_sum;
     uint64_t mft_modified_delta_count;
 
+    uint64_t mft_modified_delta_over_1s;
+    uint64_t mft_modified_delta_over_1m;
+    uint64_t mft_modified_delta_over_1h;
+    uint64_t mft_modified_delta_over_1d;
+    uint64_t mft_modified_delta_over_1w;
+    uint64_t mft_modified_delta_over_30d;
+
     int64_t accessed_delta_min;
     int64_t accessed_delta_max;
     int64_t accessed_delta_sum;
     uint64_t accessed_delta_count;
+
+    uint64_t accessed_delta_over_1s;
+    uint64_t accessed_delta_over_1m;
+    uint64_t accessed_delta_over_1h;
+    uint64_t accessed_delta_over_1d;
+    uint64_t accessed_delta_over_1w;
+    uint64_t accessed_delta_over_30d;
 } statistics;
 
 /**
