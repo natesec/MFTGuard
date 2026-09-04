@@ -49,6 +49,26 @@ typedef struct
     uint64_t accessed_si_before_fn;
     uint64_t accessed_si_equal_fn;
     uint64_t accessed_si_after_fn;
+
+    int64_t creation_delta_min;
+    int64_t creation_delta_max;
+    int64_t creation_delta_sum;
+    uint64_t creation_delta_count;
+
+    int64_t modified_delta_min;
+    int64_t modified_delta_max;
+    int64_t modified_delta_sum;
+    uint64_t modified_delta_count;
+
+    int64_t mft_modified_delta_min;
+    int64_t mft_modified_delta_max;
+    int64_t mft_modified_delta_sum;
+    uint64_t mft_modified_delta_count;
+
+    int64_t accessed_delta_min;
+    int64_t accessed_delta_max;
+    int64_t accessed_delta_sum;
+    uint64_t accessed_delta_count;
 } statistics;
 
 /**

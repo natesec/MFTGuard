@@ -2,6 +2,49 @@
 
 #include "rules.h"
 
+/**
+ * @brief Update aggregate statistics for a timestamp delta.
+ * @param delta calculated timestamp delta in 100-ns units.
+ * @param min Pointer to the minimum delta.
+ * @param max Pointer to the max delta.
+ * @param sum Pointer to the cumulative delta sum.
+ * @param count Pointer to the number of recorded deltas.
+ */
+static void statistics_update_delta(
+    int64_t delta,
+    int64_t *min,
+    int64_t *max,
+    int64_t *sum,
+    uint64_t *count
+);
+
+/**
+ * @brief Calculates the difference between an SI and an FN timestamp.
+ * @param fn_timestamp FILETIME timestamp value from an FN attribute.
+ * @param si_timestamp FILETIME timestamp value from an SI attribute.
+ * @return uint64_t timestamp difference in 100-ns units.
+ */
+static int64_t statistics_timestamp_delta(
+    uint64_t fn_timestamp,
+    uint64_t si_timestamp
+);
+
+/**
+ * @brief Print aggregate timestamp delta statistics.
+ * @param label identifies timestamp being reported.
+ * @param min minimum timestamp delta.
+ * @param max maximum timestamp delta.
+ * @param sum sum of all timestamp deltas.
+ * @param count number of recorded deltas.
+ */
+static void statistics_print_delta(
+    const char *label,
+    int64_t min,
+    int64_t max,
+    int64_t sum,
+    uint64_t count
+);
+
 void statistics_init(statistics *stats)
 {
     if (stats == NULL)
@@ -116,7 +159,21 @@ void statistics_collect(statistics *stats,
             continue;
         }
 
-        /** CREATION TIME */
+
+        /** ---------- CREATION TIME ---------- */
+        int64_t creation_delta = statistics_timestamp_delta(
+            fn->creation_time,
+            metadata->si.creation_time
+        );
+
+        statistics_update_delta(
+            creation_delta,
+            &stats->creation_delta_min,
+            &stats->creation_delta_max,
+            &stats->creation_delta_sum,
+            &stats->creation_delta_count
+        );
+
         if (metadata->si.creation_time < fn->creation_time)
         {
             stats->creation_si_before_fn++;
@@ -130,7 +187,21 @@ void statistics_collect(statistics *stats,
             stats->creation_si_after_fn++;
         }
 
-        /** MODIFIED */
+        /** ---------- MODIFIED ---------- */
+
+        int64_t modified_delta = statistics_timestamp_delta(
+            fn->modified_time,
+            metadata->si.modified_time
+        );
+
+        statistics_update_delta(
+            modified_delta,
+            &stats->modified_delta_min,
+            &stats->modified_delta_max,
+            &stats->modified_delta_sum,
+            &stats->modified_delta_count
+        );
+
         if (metadata->si.modified_time < fn->modified_time)
         {
             stats->modified_si_before_fn++;
@@ -144,7 +215,21 @@ void statistics_collect(statistics *stats,
             stats->modified_si_after_fn++;
         }
 
-        /** MFT MODIFIED */
+        /** ---------- MFT MODIFIED ---------- */
+
+        int64_t mft_modified_delta = statistics_timestamp_delta(
+            fn->mft_modified_time,
+            metadata->si.mft_modified_time
+        );
+
+        statistics_update_delta(
+            mft_modified_delta,
+            &stats->mft_modified_delta_min,
+            &stats->mft_modified_delta_max,
+            &stats->mft_modified_delta_sum,
+            &stats->mft_modified_delta_count
+        );
+
         if (metadata->si.mft_modified_time < fn->mft_modified_time)
         {
             stats->mft_modified_si_before_fn++;
@@ -158,7 +243,21 @@ void statistics_collect(statistics *stats,
             stats->mft_modified_si_after_fn++;
         }
 
-        /** ACCESSED */
+        /** ---------- ACCESSED ---------- */
+
+        int64_t accessed_delta = statistics_timestamp_delta(
+            fn->accessed_time,
+            metadata->si.accessed_time
+        );
+
+        statistics_update_delta(
+            accessed_delta,
+            &stats->accessed_delta_min,
+            &stats->accessed_delta_max,
+            &stats->accessed_delta_sum,
+            &stats->accessed_delta_count
+        );
+
         if (metadata->si.accessed_time < fn->accessed_time)
         {
             stats->accessed_si_before_fn++;
@@ -248,4 +347,103 @@ void statistics_print(const statistics *stats)
 
     printf("\n");
 
+    printf("SI/FN TIMESTAMP DELTAS\n");
+    statistics_print_delta(
+        "Creation",
+        stats->creation_delta_min,
+        stats->creation_delta_max,
+        stats->creation_delta_sum,
+        stats->creation_delta_count
+    );
+
+    statistics_print_delta(
+        "Modified",
+        stats->modified_delta_min,
+        stats->modified_delta_max,
+        stats->modified_delta_sum,
+        stats->modified_delta_count
+    );
+
+    statistics_print_delta(
+        "MFT Modified",
+        stats->mft_modified_delta_min,
+        stats->mft_modified_delta_max,
+        stats->mft_modified_delta_sum,
+        stats->mft_modified_delta_count
+    );
+
+    statistics_print_delta(
+        "Accessed",
+        stats->accessed_delta_min,
+        stats->accessed_delta_max,
+        stats->accessed_delta_sum,
+        stats->accessed_delta_count
+    );
+
+    printf("\n");
+
+}
+
+static void statistics_update_delta(
+    int64_t delta,
+    int64_t *min,
+    int64_t *max,
+    int64_t *sum,
+    uint64_t *count)
+{
+    if (*count == 0)
+    {
+        *min = delta;
+        *max = delta;
+    }
+    else
+    {
+        if (delta < *min)
+        {
+            *min = delta;
+        }
+
+        if (delta > *max)
+        {
+            *max = delta;
+        }
+    }
+
+    *sum += delta;
+    (*count)++;
+}
+
+static int64_t statistics_timestamp_delta(
+    uint64_t fn_timestamp,
+    uint64_t si_timestamp)
+{
+    if (fn_timestamp >= si_timestamp)
+    {
+        return (int64_t)(fn_timestamp - si_timestamp);
+    }
+
+    return -(int64_t)(si_timestamp - fn_timestamp);
+}
+
+static void statistics_print_delta(
+    const char *label,
+    int64_t min,
+    int64_t max,
+    int64_t sum,
+    uint64_t count)
+{
+    double mean = 0.0;
+
+    if (count > 0)
+    {
+        mean = (double)sum / (long double)count;
+    }
+
+    printf(
+        "%s: min=%lld, max=%lld, mean=%.2f (100-ns units)\n",
+        label,
+        (long long)min,
+        (long long)max,
+        mean
+    );
 }
