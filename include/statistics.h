@@ -97,6 +97,10 @@ typedef struct
     uint64_t accessed_delta_over_1d;
     uint64_t accessed_delta_over_1w;
     uint64_t accessed_delta_over_30d;
+
+    uint64_t modified_and_mft_modified_over_1d;
+    uint64_t modified_and_mft_modified_over_1w;
+    uint64_t modified_and_mft_modified_over_30d;
 } statistics;
 
 /**

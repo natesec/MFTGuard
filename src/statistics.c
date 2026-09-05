@@ -372,6 +372,25 @@ void statistics_collect(statistics *stats,
         {
             stats->accessed_si_after_fn++;
         }
+
+        /** ---------- COMBINATIONS ---------- */
+        if (modified_magnitude > STATISTICS_DELTA_DAY &&
+            mft_modified_magnitude > STATISTICS_DELTA_DAY)
+        {
+            stats->modified_and_mft_modified_over_1d++;
+        }
+
+        if (modified_magnitude > STATISTICS_DELTA_WEEK &&
+            mft_modified_magnitude > STATISTICS_DELTA_WEEK)
+        {
+            stats->modified_and_mft_modified_over_1w++;
+        }
+
+        if (modified_magnitude > STATISTICS_DELTA_MONTH &&
+            mft_modified_magnitude > STATISTICS_DELTA_MONTH)
+        {
+            stats->modified_and_mft_modified_over_30d++;
+        }
     }
 }
 
@@ -524,6 +543,12 @@ void statistics_print(const statistics *stats)
     stats->accessed_delta_over_1w,
     stats->accessed_delta_over_30d
     );
+
+    printf("\n");
+
+    printf("Modified + MFT modified over 1d: %llu\n", stats->modified_and_mft_modified_over_1d);
+    printf("Modified + MFT modified over 1w: %llu\n", stats->modified_and_mft_modified_over_1w);
+    printf("Modified + MFT modified over 30d: %llu\n", stats->modified_and_mft_modified_over_30d);
 
     printf("\n");
 }
