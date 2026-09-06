@@ -5,7 +5,7 @@
 //#include "attributes.h"
 #include "timestamps.h"
 
-#define SI_FN_MISMATCH_THRESHOLD 3
+#define SI_FN_MISMATCH_THRESHOLD 2
 #define TIMESTAMP_ROLLBACK_THRESHOLD 2
 #define ZEROED_TIMESTAMP_DIGITS 9
 #define ZEROED_TIMESTAMP_MINIMUM_MATCHES 2
@@ -81,22 +81,17 @@ bool rules_should_report(uint32_t rule_flags)
         return false;
     }
 
-    if (rule_flags & RULE_FLAG(RULE_TIMESTAMP_ROLLBACK))
+    if (rule_flags & RULE_FLAG(RULE_ZEROED_TIMESTAMP))
     {
         return true;
     }
 
-    if ((rule_flags & RULE_FLAG(RULE_SI_FN_MISMATCH)) && (rule_flags & RULE_FLAG(RULE_ZEROED_TIMESTAMP)))
+    if ((rule_flags & RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS)))
     {
         return true;
     }
 
-    if ((rule_flags & RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS)) && (rule_flags & RULE_FLAG(RULE_ZEROED_TIMESTAMP)))
-    {
-        return true;
-    }
-
-    if ((rule_flags & RULE_FLAG(RULE_SI_FN_MISMATCH)) && (rule_flags & RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS)))
+    if ((rule_flags & RULE_FLAG(RULE_SI_FN_MISMATCH)))
     {
         return true;
     }
@@ -139,6 +134,22 @@ static uint32_t rule_si_fn_mismatch(const record_metadata *metadata)
             continue;
         }
 
+        if (timestamp_is_after(metadata->si.creation_time, fn->creation_time))
+        {
+            mismatch_count += 2;
+        }
+
+        if (timestamp_is_before(metadata->si.mft_modified_time, fn->mft_modified_time))
+        {
+            mismatch_count++;
+        }
+
+        if (timestamp_is_after(metadata->si.modified_time, fn->modified_time))
+        {
+            mismatch_count++;
+        }
+
+        /**
         if (!timestamp_equal(metadata->si.creation_time, fn->creation_time))
         {
             mismatch_count++;
@@ -158,6 +169,7 @@ static uint32_t rule_si_fn_mismatch(const record_metadata *metadata)
         {
             mismatch_count++;
         }
+        */
     }
 
     return mismatch_count;
