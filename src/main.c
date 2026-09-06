@@ -55,8 +55,8 @@ int main(int argc, char *argv[])
     statistics stats;
     statistics_init(&stats);
 
-    //while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
-    while (mft.record_number < mft.record_count)
+    //while (mft.record_number < mft.record_count)
+    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
     {
         if (!mft_read_record(&mft))
         {
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         mft.record_number++;
     }
 
-    statistics_print(&stats);
+    //statistics_print(&stats);
 
     mft_close(&mft);
 
