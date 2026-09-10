@@ -4,6 +4,7 @@
 #include "rules.h"
 #include "report.h"
 #include "statistics.h"
+#include "candidate.h"
 
 int main(int argc, char *argv[])
 {
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
 
     /** TESTING */
     //mft.record_number = 625893;
-    uint64_t test_record_limit = 100000;
+    uint64_t test_record_limit = 100;
     printf(
         MESSAGE_MARKER "Scanning %llu records...\n",
         (unsigned long long)mft.record_count
@@ -55,8 +56,10 @@ int main(int argc, char *argv[])
     statistics stats;
     statistics_init(&stats);
 
-    //while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
-    while (mft.record_number < mft.record_count)
+    candidate *candidates = NULL;
+
+    //while (mft.record_number < mft.record_count)
+    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
     {
         if (!mft_read_record(&mft))
         {
@@ -97,12 +100,21 @@ int main(int argc, char *argv[])
         if (should_report)
         {
             //report_record(&record, rule_flags);
+            
+            if (!candidate_add(&candidates,&record.metadata, rule_flags))
+            {
+                fprintf(stderr, ERROR_MARKER "Failed to add candidate record");
+                mft.record_number++;
+                continue;
+            }
         }
 
         mft.record_number++;
     }
 
-    statistics_print(&stats);
+    candidate_free_all(&candidates);
+
+    //statistics_print(&stats);
 
     mft_close(&mft);
 

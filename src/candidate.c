@@ -20,7 +20,7 @@ static bool candidate_copy_filename(
  * @param metadata pointer to the record_metadata struct.
  * @return true if successful copy, false otherwise.
  */
-static bool candidate_copy_file_names(candidate *candidate, record_metadata *metadata);
+static bool candidate_copy_file_names(candidate *candidate, const record_metadata *metadata);
 
 bool candidate_add(
     candidate **candidates,
@@ -93,7 +93,7 @@ static bool candidate_copy_filename(
         return false;
     }
 
-    if (source->filename == NULL || source->filename_length == NULL)
+    if (source->filename == NULL || source->filename_length == 0)
     {
         return false;
     }
@@ -114,7 +114,7 @@ static bool candidate_copy_filename(
     return true;
 }
 
-static bool candidate_copy_file_names(candidate *candidate, record_metadata *metadata)
+static bool candidate_copy_file_names(candidate *candidate, const record_metadata *metadata)
 {
     if (candidate == NULL || metadata == NULL)
     {
