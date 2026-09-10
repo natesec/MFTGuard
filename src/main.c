@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
 
     candidate *candidates = NULL;
 
-    //while (mft.record_number < mft.record_count)
-    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
+    //while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
+    while (mft.record_number < mft.record_count)
     {
         if (!mft_read_record(&mft))
         {
@@ -111,26 +111,6 @@ int main(int argc, char *argv[])
 
         mft.record_number++;
     }
-
-    /** TESTING */
-
-    candidate *current;
-    candidate *tmp;
-
-    HASH_ITER(hh, candidates, current, tmp)
-    {
-        printf(MESSAGE_MARKER "Candidate record: %llu", (unsigned long long)current->record_number);
-        for (uint32_t i = 0; i < current->file_name_count; i++)
-        {
-            wprintf(
-                L"----Filename: %.*ls\n",
-                current->file_names[i].filename_length,
-                (const wchar_t *)current->file_names[i].filename
-            );
-        }
-    }
-
-    /** /TESTING */
 
     candidate_free_all(&candidates);
 
