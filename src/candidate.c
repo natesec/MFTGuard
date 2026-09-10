@@ -27,6 +27,33 @@ bool candidate_add(
     const record_metadata *metadata,
     uint32_t rule_flags)
 {
+    if (candidates == NULL || metadata == NULL)
+    {
+        return false;
+    }
+
+    candidate *new_candidate = malloc(sizeof(candidate));
+
+    if (new_candidate == NULL)
+    {
+        return false;
+    }
+
+    new_candidate->record_number = metadata->record_number;
+    new_candidate->rule_flags = rule_flags;
+    new_candidate->has_standard_information = metadata->has_standard_information;
+    new_candidate->si = metadata->si;
+    new_candidate->file_names = NULL;
+    new_candidate->file_name_count = 0;
+
+    if (!candidate_copy_file_names(new_candidate, metadata))
+    {
+        free(new_candidate);
+        return false;
+    }
+
+    HASH_ADD(hh, *candidates, record_number, sizeof(new_candidate->record_number), new_candidate);
+
     return true;
 }
 
@@ -87,10 +114,12 @@ static bool candidate_copy_file_names(candidate *candidate, record_metadata *met
         return false;
     }
 
+    // Failure safe deep-copy
     for (uint32_t i = 0; i < metadata->file_name_count; i++)
     {
         candidate->file_names[i] = metadata->file_names[i];
 
+        // Replace filename pointer, deep-copy to candidate memory
         if (!candidate_copy_filename(&candidate->file_names[i], &metadata->file_names[i]))
         {
             for (uint32_t j = 0; j < i; j++)
