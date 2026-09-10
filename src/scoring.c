@@ -24,4 +24,6 @@ uint32_t scoring_score_rule_flags(uint32_t rule_flags, const statistics *stats)
     {
         score += 5;
     }
+
+    return score;
 }

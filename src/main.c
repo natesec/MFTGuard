@@ -5,6 +5,7 @@
 #include "report.h"
 #include "statistics.h"
 #include "candidate.h"
+#include "scoring.h"
 
 int main(int argc, char *argv[])
 {
@@ -58,8 +59,8 @@ int main(int argc, char *argv[])
 
     candidate *candidates = NULL;
 
-    //while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
-    while (mft.record_number < mft.record_count)
+    //while (mft.record_number < mft.record_count)
+    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
     {
         if (!mft_read_record(&mft))
         {
@@ -111,6 +112,20 @@ int main(int argc, char *argv[])
 
         mft.record_number++;
     }
+
+    /** TESTING */
+
+    candidate *current;
+    candidate *tmp;
+
+    HASH_ITER(hh, candidates, current, tmp)
+    {
+        printf(MESSAGE_MARKER "Record number: %llu\n", current->record_number);
+        current->confidence_score = scoring_score_rule_flags(current->rule_flags, &stats);
+        printf("----Score: %u\n", current->confidence_score);
+    }
+
+    /** /TESTING */
 
     candidate_free_all(&candidates);
 
