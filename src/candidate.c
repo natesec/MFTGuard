@@ -59,7 +59,29 @@ bool candidate_add(
 
 void candidate_free_all(candidate **candidates)
 {
+    if (candidates == NULL)
+    {
+        return;
+    }
+    
+    candidate *current;
+    candidate *tmp;
 
+    HASH_ITER(hh, *candidates, current, tmp)
+    {
+        for (uint32_t i = 0; i < current->file_name_count; i++)
+        {
+            free((void *)current->file_names[i].filename);
+        }
+
+        free(current->file_names);
+
+        HASH_DEL(*candidates, current);
+
+        free(current);
+    }
+
+    *candidates = NULL;
 }
 
 static bool candidate_copy_filename(
