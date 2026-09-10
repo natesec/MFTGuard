@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         if (should_report)
         {
             //report_record(&record, rule_flags);
-            
+
             if (!candidate_add(&candidates,&record.metadata, rule_flags))
             {
                 fprintf(stderr, ERROR_MARKER "Failed to add candidate record");
@@ -111,6 +111,26 @@ int main(int argc, char *argv[])
 
         mft.record_number++;
     }
+
+    /** TESTING */
+
+    candidate *current;
+    candidate *tmp;
+
+    HASH_ITER(hh, candidates, current, tmp)
+    {
+        printf(MESSAGE_MARKER "Candidate record: %llu", (unsigned long long)current->record_number);
+        for (uint32_t i = 0; i < current->file_name_count; i++)
+        {
+            wprintf(
+                L"----Filename: %.*ls\n",
+                current->file_names[i].filename_length,
+                (const wchar_t *)current->file_names[i].filename
+            );
+        }
+    }
+
+    /** /TESTING */
 
     candidate_free_all(&candidates);
 
