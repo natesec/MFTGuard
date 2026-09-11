@@ -15,4 +15,12 @@
  */
 uint32_t scoring_score_rule_flags(uint32_t rule_flags, const statistics *stats);
 
+/**
+ * @brief Calculates the score contribution from timestamp clustering in the SI.
+ * @param current pointer to the current candidate being scored.
+ * @param candidates pointer to the candidates hash table.
+ * @return uint32_t score contributing from timestamp clustering.
+ */
+uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate *candidates);
+
 #endif
