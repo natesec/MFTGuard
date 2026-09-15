@@ -23,4 +23,13 @@ uint32_t scoring_score_rule_flags(uint32_t rule_flags, const statistics *stats);
  */
 uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate *candidates);
 
+/**
+ * @brief Calculate the score contribution based on number of matching FILE_NAME
+ *        parent directory fields.
+ * @param current Pointer to the current candidate being scored.
+ * @param candidates Pointer to the candidates hash table.
+ * @return uint32_t score contributing from parent directory results.
+ */
+uint32_t scoring_score_parent_directory(const candidate *current, candidate *candidates);
+
 #endif

@@ -122,7 +122,17 @@ int main(int argc, char *argv[])
     {
         printf(MESSAGE_MARKER "Record number: %llu\n", current->record_number);
         current->confidence_score = scoring_score_rule_flags(current->rule_flags, &stats);
-        printf("----Score: %u\n", current->confidence_score);
+
+        uint32_t cluster_score = scoring_score_timestamp_clustering(current, candidates);
+        current->confidence_score +=  cluster_score;
+
+        uint32_t parent_directory_score = scoring_score_parent_directory(current, candidates);
+        current->confidence_score += parent_directory_score;
+
+        printf("----Clustering score: %u\n", cluster_score);
+        printf("----Parent dir score: %u\n", parent_directory_score);
+        printf("----Total Score: %u\n", current->confidence_score);
+        cluster_score = 0;
     }
 
     /** /TESTING */
