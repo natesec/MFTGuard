@@ -41,4 +41,12 @@ bool candidate_add(
  */
 void candidate_free_all(candidate **candidates);
 
+/**
+ * @brief Calculate the confidence score for a single candidate.
+ * @param current Pointer to the current candidate.
+ * @param candidates Pointer to the candidates hash table.
+ * @return uint32_t confidence score from the combined scoring function results.
+ */
+uint32_t candidate_calculate_score(const candidate *current, candidate *candidates);
+
 #endif

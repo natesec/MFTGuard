@@ -3,6 +3,8 @@
 
 #include "candidate.h"
 
+#include "scoring.h"
+
 /**
  * @brief Copy the filename from a filename attribute field into candidate memory.
  * @param destination pointer to the candidate file_name_information struct.
@@ -82,6 +84,22 @@ void candidate_free_all(candidate **candidates)
     }
 
     *candidates = NULL;
+}
+
+uint32_t candidate_calculate_score(const candidate *current, candidate *candidates)
+{
+    if (current == NULL || candidates == NULL)
+    {
+        return 0;
+    }
+
+    uint32_t score = 0;
+
+    score += scoring_score_rule_flags(current->rule_flags);
+    score += scoring_score_timestamp_clustering(current, candidates);
+    score += scoring_score_parent_directory(current, candidates);
+
+    return score;
 }
 
 static bool candidate_copy_filename(

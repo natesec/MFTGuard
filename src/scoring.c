@@ -22,7 +22,7 @@ static bool scoring_timestamp_is_near(uint64_t timestamp_a, uint64_t timestamp_b
 static bool scoring_is_usable_file_name(const file_name_information *fn);
 
 /** TODO: implement statistics-based weighted, contextual score */
-uint32_t scoring_score_rule_flags(uint32_t rule_flags, const statistics *stats)
+uint32_t scoring_score_rule_flags(uint32_t rule_flags)
 {
     uint32_t score = 0;
 

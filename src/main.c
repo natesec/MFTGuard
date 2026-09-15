@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
 
     candidate *candidates = NULL;
 
-    //while (mft.record_number < mft.record_count)
-    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
+    //while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
+    while (mft.record_number < mft.record_count)
     {
         if (!mft_read_record(&mft))
         {
@@ -121,7 +121,9 @@ int main(int argc, char *argv[])
     HASH_ITER(hh, candidates, current, tmp)
     {
         printf(MESSAGE_MARKER "Record number: %llu\n", current->record_number);
-        current->confidence_score = scoring_score_rule_flags(current->rule_flags, &stats);
+
+        uint32_t rules_score = scoring_score_rule_flags(current->rule_flags);
+        current->confidence_score = rules_score;
 
         uint32_t cluster_score = scoring_score_timestamp_clustering(current, candidates);
         current->confidence_score +=  cluster_score;
@@ -129,6 +131,7 @@ int main(int argc, char *argv[])
         uint32_t parent_directory_score = scoring_score_parent_directory(current, candidates);
         current->confidence_score += parent_directory_score;
 
+        printf("----Rules score: %u\n", rules_score);
         printf("----Clustering score: %u\n", cluster_score);
         printf("----Parent dir score: %u\n", parent_directory_score);
         printf("----Total Score: %u\n", current->confidence_score);

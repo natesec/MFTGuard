@@ -13,7 +13,7 @@
  * @param stats pointer to the statistics struct containing aggregate data.
  * @return uint32_t score contribution of the candidate's triggered rules.
  */
-uint32_t scoring_score_rule_flags(uint32_t rule_flags, const statistics *stats);
+uint32_t scoring_score_rule_flags(uint32_t rule_flags);
 
 /**
  * @brief Calculates the score contribution from timestamp clustering in the SI.
