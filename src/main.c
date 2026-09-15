@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <signal.h>
+
 #include "mft.h"
 #include "utils.h"
 #include "rules.h"
@@ -7,8 +9,18 @@
 #include "candidate.h"
 #include "scoring.h"
 
+static volatile sig_atomic_t shutdown_requested = 0;
+
+/**
+ * @brief Signal handler for unexpected shutdown.
+ * @param signal int value of signal.
+ */
+static void handle_sigint(int signal);
+
 int main(int argc, char *argv[])
 {
+    signal(SIGINT, handle_sigint);
+
     if (argc < 3)
     {
         fprintf(stderr, ERROR_MARKER "USAGE: %s <file> <sector_size>\n", argv[0]);
@@ -62,6 +74,12 @@ int main(int argc, char *argv[])
     //while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
     while (mft.record_number < mft.record_count)
     {
+        if (shutdown_requested)
+        {
+            printf(MESSAGE_MARKER"Shutdown requested. Stopping...\n");
+            break;
+        }
+
         if (!mft_read_record(&mft))
         {
             statistics_collect(&stats, NULL, MFT_RECORD_SKIPPED, RULE_NONE, false);
@@ -120,6 +138,12 @@ int main(int argc, char *argv[])
 
     HASH_ITER(hh, candidates, current, tmp)
     {
+        if (shutdown_requested)
+        {
+            printf(MESSAGE_MARKER"Shutdown requested. Stopping...\n");
+            break;
+        }
+        
         printf(MESSAGE_MARKER "Record number: %llu\n", current->record_number);
 
         uint32_t rules_score = scoring_score_rule_flags(current->rule_flags);
@@ -149,4 +173,11 @@ int main(int argc, char *argv[])
     printf(SUCCESS_MARKER "MFT closed successfully\n");
 
     return 0;
+}
+
+static void handle_sigint(int signal)
+{
+    (void)signal;
+
+    shutdown_requested = 1;
 }
