@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         {
             //report_record(&record, rule_flags);
 
-            if (!candidate_add(&candidates,&record.metadata, rule_flags))
+            if (!candidate_add(&candidates, &record.metadata, rule_flags))
             {
                 fprintf(stderr, ERROR_MARKER "Failed to add candidate record");
                 mft.record_number++;
@@ -136,6 +136,10 @@ int main(int argc, char *argv[])
     candidate *current;
     candidate *tmp;
 
+    scoring_statistics scoring_stats = {0};
+
+    uint64_t candidate_count = 0;
+
     HASH_ITER(hh, candidates, current, tmp)
     {
         if (shutdown_requested)
@@ -143,30 +147,94 @@ int main(int argc, char *argv[])
             printf(MESSAGE_MARKER"Shutdown requested. Stopping...\n");
             break;
         }
-        
-        printf(MESSAGE_MARKER "Record number: %llu\n", current->record_number);
+
+        candidate_count++;
+
+        printf(
+            MESSAGE_MARKER "Candidate number: %llu | Record number: %llu\n",
+            (unsigned long long)candidate_count,
+            (unsigned long long)current->record_number
+        );
 
         uint32_t rules_score = scoring_score_rule_flags(current->rule_flags);
         current->confidence_score = rules_score;
+        if (rules_score <= STATISTICS_RULE_SCORE_MAX)
+        {
+            scoring_stats.rule_score_distribution[rules_score]++;
+        }
 
         uint32_t cluster_score = scoring_score_timestamp_clustering(current, candidates);
         current->confidence_score +=  cluster_score;
+        if (cluster_score <= STATISTICS_CLUSTERING_SCORE_MAX)
+        {
+            scoring_stats.clustering_score_distribution[cluster_score]++;
+        }
 
         uint32_t parent_directory_score = scoring_score_parent_directory(current, candidates);
         current->confidence_score += parent_directory_score;
+        if (parent_directory_score <= STATISTICS_PARENT_DIRECTORY_SCORE_MAX)
+        {
+            scoring_stats.parent_directory_score_distribution[parent_directory_score]++;
+        }
 
+        if (current->confidence_score <= STATISTICS_TOTAL_SCORE_MAX)
+        {
+            scoring_stats.total_score_distribution[current->confidence_score]++;
+        }
+
+        /*
         printf("----Rules score: %u\n", rules_score);
         printf("----Clustering score: %u\n", cluster_score);
         printf("----Parent dir score: %u\n", parent_directory_score);
         printf("----Total Score: %u\n", current->confidence_score);
         cluster_score = 0;
+        */
+    }
+
+    printf("CANDIDATE COUNT: %llu\n", (unsigned long long)candidate_count);
+
+    printf(SUCCESS_MARKER "SCORING DISTRIBUTION\n");
+    printf("----RULES\n");
+    for (int32_t i = 0; i < STATISTICS_RULE_SCORE_MAX; i++)
+    {
+        if (scoring_stats.rule_score_distribution[i] > 0)
+        {
+            printf("--------Score %u: %llu\n", i, (unsigned long long)scoring_stats.rule_score_distribution[i]);
+        }
+    }
+
+    printf("----CLUSTER SCORE\n");
+    for (int i = 0; i < STATISTICS_CLUSTERING_SCORE_MAX; i++)
+    {
+        if (scoring_stats.clustering_score_distribution[i] > 0)
+        {
+            printf("--------Score: %u: %llu\n", i, (unsigned long long)scoring_stats.clustering_score_distribution[i]);
+        }
+    }
+
+    printf("----PARENT DIR SCORE\n");
+    for (int i = 0; i < STATISTICS_PARENT_DIRECTORY_SCORE_MAX; i++)
+    {
+        if (scoring_stats.parent_directory_score_distribution[i] > 0)
+        {
+            printf("--------Score: %u: %llu\n", i, (unsigned long long)scoring_stats.parent_directory_score_distribution[i]);
+        }
+    }
+
+    printf("----TOTAL\n");
+    for (int i = 0; i < STATISTICS_TOTAL_SCORE_MAX; i++)
+    {
+        if (scoring_stats.total_score_distribution[i] > 0)
+        {
+            printf("--------Score: %u: %llu\n", i, (unsigned long long)scoring_stats.total_score_distribution[i]);
+        }
     }
 
     /** /TESTING */
 
     candidate_free_all(&candidates);
 
-    //statistics_print(&stats);
+    statistics_print(&stats);
 
     mft_close(&mft);
 

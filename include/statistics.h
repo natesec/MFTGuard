@@ -10,6 +10,12 @@
 /** Temporary count attainted from clean sample. */
 #define STATISTICS_MAX_FILE_NAMES 8
 
+/** Scoring.c max array values */
+#define STATISTICS_RULE_SCORE_MAX 50
+#define STATISTICS_CLUSTERING_SCORE_MAX 10
+#define STATISTICS_PARENT_DIRECTORY_SCORE_MAX 15
+#define STATISTICS_TOTAL_SCORE_MAX 75
+
 /**
  * @brief Represents aggregate statistical data.
  */
@@ -102,6 +108,17 @@ typedef struct
     uint64_t modified_and_mft_modified_over_1w;
     uint64_t modified_and_mft_modified_over_30d;
 } statistics;
+
+/**
+ * @brief Represents the statistical data from scoring
+ */
+typedef struct
+{
+    uint64_t rule_score_distribution[STATISTICS_RULE_SCORE_MAX + 1];
+    uint64_t clustering_score_distribution[STATISTICS_CLUSTERING_SCORE_MAX + 1];
+    uint64_t parent_directory_score_distribution[STATISTICS_PARENT_DIRECTORY_SCORE_MAX + 1];
+    uint64_t total_score_distribution[STATISTICS_TOTAL_SCORE_MAX + 1];
+} scoring_statistics;
 
 /**
  * @brief Initialize the statistics structure.
