@@ -86,7 +86,7 @@ void candidate_free_all(candidate **candidates)
     *candidates = NULL;
 }
 
-uint32_t candidate_calculate_score(const candidate *current, candidate *candidates)
+uint32_t candidate_calculate_score(const candidate *current, candidate *candidates, uint32_t *clustering_matches, uint32_t *parent_directory_matches)
 {
     if (current == NULL || candidates == NULL)
     {
@@ -96,8 +96,8 @@ uint32_t candidate_calculate_score(const candidate *current, candidate *candidat
     uint32_t score = 0;
 
     score += scoring_score_rule_flags(current->rule_flags);
-    score += scoring_score_timestamp_clustering(current, candidates);
-    score += scoring_score_parent_directory(current, candidates);
+    score += scoring_score_timestamp_clustering(current, candidates, clustering_matches);
+    score += scoring_score_parent_directory(current, candidates, parent_directory_matches);
 
     return score;
 }

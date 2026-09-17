@@ -15,6 +15,8 @@
 #define STATISTICS_CLUSTERING_SCORE_MAX 10
 #define STATISTICS_PARENT_DIRECTORY_SCORE_MAX 15
 #define STATISTICS_TOTAL_SCORE_MAX 75
+#define STATISTICS_CLUSTERING_MATCH_MAX 1000
+#define STATISTICS_PARENT_DIRECTORY_MATCH_MAX 1000
 
 /**
  * @brief Represents aggregate statistical data.
@@ -118,6 +120,8 @@ typedef struct
     uint64_t clustering_score_distribution[STATISTICS_CLUSTERING_SCORE_MAX + 1];
     uint64_t parent_directory_score_distribution[STATISTICS_PARENT_DIRECTORY_SCORE_MAX + 1];
     uint64_t total_score_distribution[STATISTICS_TOTAL_SCORE_MAX + 1];
+    uint64_t clustering_match_distribution[STATISTICS_CLUSTERING_MATCH_MAX + 1];
+    uint64_t parent_directory_match_distribution[STATISTICS_PARENT_DIRECTORY_MATCH_MAX + 1];
 } scoring_statistics;
 
 /**

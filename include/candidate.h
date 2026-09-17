@@ -47,6 +47,6 @@ void candidate_free_all(candidate **candidates);
  * @param candidates Pointer to the candidates hash table.
  * @return uint32_t confidence score from the combined scoring function results.
  */
-uint32_t candidate_calculate_score(const candidate *current, candidate *candidates);
+uint32_t candidate_calculate_score(const candidate *current, candidate *candidates, uint32_t *clustering_matches, uint32_t *parent_directory_matches);
 
 #endif

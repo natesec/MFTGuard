@@ -21,7 +21,7 @@ uint32_t scoring_score_rule_flags(uint32_t rule_flags);
  * @param candidates pointer to the candidates hash table.
  * @return uint32_t score contributing from timestamp clustering.
  */
-uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate *candidates);
+uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate *candidates, uint32_t *match_count);
 
 /**
  * @brief Calculate the score contribution based on number of matching FILE_NAME
@@ -30,6 +30,6 @@ uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate 
  * @param candidates Pointer to the candidates hash table.
  * @return uint32_t score contributing from parent directory results.
  */
-uint32_t scoring_score_parent_directory(const candidate *current, candidate *candidates);
+uint32_t scoring_score_parent_directory(const candidate *current, candidate *candidates, uint32_t *match_count);
 
 #endif

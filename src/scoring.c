@@ -49,7 +49,7 @@ uint32_t scoring_score_rule_flags(uint32_t rule_flags)
     return score;
 }
 
-uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate *candidates)
+uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate *candidates, uint32_t *match_count)
 {
     if (current == NULL || candidates == NULL)
     {
@@ -59,6 +59,11 @@ uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate 
     if (!current->has_standard_information)
     {
         return 0;
+    }
+
+    if (match_count != NULL)
+    {
+        *match_count = 0;
     }
 
     candidate *other;
@@ -87,6 +92,11 @@ uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate 
         }
     }
 
+    if (match_count != NULL)
+    {
+        *match_count = matches;
+    }
+
     if (matches == 0)
     {
         return 0;
@@ -95,7 +105,7 @@ uint32_t scoring_score_timestamp_clustering(const candidate *current, candidate 
     return TIMESTAMP_CLUSTER_SCORE;
 }
 
-uint32_t scoring_score_parent_directory(const candidate *current, candidate *candidates)
+uint32_t scoring_score_parent_directory(const candidate *current, candidate *candidates, uint32_t *match_count)
 {
     candidate *other;
     candidate *temp;
@@ -104,6 +114,11 @@ uint32_t scoring_score_parent_directory(const candidate *current, candidate *can
     if (current == NULL || candidates == NULL)
     {
         return 0;
+    }
+
+    if (match_count != NULL)
+    {
+        *match_count = 0;
     }
 
     HASH_ITER(hh, candidates, other, temp)
@@ -141,6 +156,11 @@ uint32_t scoring_score_parent_directory(const candidate *current, candidate *can
         {
             matches++;
         }
+    }
+
+    if (match_count != 0)
+    {
+        *match_count = matches;
     }
 
     if (matches == 0)

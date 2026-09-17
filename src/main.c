@@ -140,6 +140,9 @@ int main(int argc, char *argv[])
 
     uint64_t candidate_count = 0;
 
+    uint32_t cluster_matches;
+    uint32_t parent_directory_matches;
+
     HASH_ITER(hh, candidates, current, tmp)
     {
         if (shutdown_requested)
@@ -163,18 +166,36 @@ int main(int argc, char *argv[])
             scoring_stats.rule_score_distribution[rules_score]++;
         }
 
-        uint32_t cluster_score = scoring_score_timestamp_clustering(current, candidates);
+        uint32_t cluster_score = scoring_score_timestamp_clustering(current, candidates, &cluster_matches);
         current->confidence_score +=  cluster_score;
         if (cluster_score <= STATISTICS_CLUSTERING_SCORE_MAX)
         {
             scoring_stats.clustering_score_distribution[cluster_score]++;
         }
 
-        uint32_t parent_directory_score = scoring_score_parent_directory(current, candidates);
+        if (cluster_matches >= STATISTICS_CLUSTERING_MATCH_MAX)
+        {
+            scoring_stats.clustering_match_distribution[STATISTICS_CLUSTERING_MATCH_MAX]++;
+        }
+        else
+        {
+            scoring_stats.clustering_match_distribution[cluster_matches]++;
+        }
+
+        uint32_t parent_directory_score = scoring_score_parent_directory(current, candidates, &parent_directory_matches);
         current->confidence_score += parent_directory_score;
         if (parent_directory_score <= STATISTICS_PARENT_DIRECTORY_SCORE_MAX)
         {
             scoring_stats.parent_directory_score_distribution[parent_directory_score]++;
+        }
+
+        if (parent_directory_matches >= STATISTICS_PARENT_DIRECTORY_MATCH_MAX)
+        {
+            scoring_stats.parent_directory_match_distribution[STATISTICS_PARENT_DIRECTORY_MATCH_MAX]++;
+        }
+        else
+        {
+            scoring_stats.parent_directory_match_distribution[parent_directory_matches]++;
         }
 
         if (current->confidence_score <= STATISTICS_TOTAL_SCORE_MAX)
@@ -228,6 +249,42 @@ int main(int argc, char *argv[])
         {
             printf("--------Score: %u: %llu\n", i, (unsigned long long)scoring_stats.total_score_distribution[i]);
         }
+    }
+
+    printf("----Cluster score match distribution\n");
+    for (uint32_t i = 0; i < STATISTICS_CLUSTERING_MATCH_MAX; i++)
+    {
+        if (scoring_stats.clustering_match_distribution[i] > 0)
+        {
+            printf("--------Match %u: %llu\n", i, (unsigned long long)scoring_stats.clustering_match_distribution[i]);
+        }
+    }
+
+    if (scoring_stats.clustering_match_distribution[STATISTICS_CLUSTERING_MATCH_MAX] > 0)
+    {
+        printf(
+            "--------Match %u+: %llu\n",
+            STATISTICS_CLUSTERING_MATCH_MAX,
+            (unsigned long long)scoring_stats.clustering_match_distribution[STATISTICS_CLUSTERING_MATCH_MAX]
+        );
+    }
+
+    printf("----Parent directory match distribution\n");
+    for (uint32_t i = 0; i < STATISTICS_PARENT_DIRECTORY_MATCH_MAX; i++)
+    {
+        if (scoring_stats.parent_directory_match_distribution[i] > 0)
+        {
+            printf("--------Match %u: %llu\n", i, (unsigned long long)scoring_stats.parent_directory_match_distribution[i]);
+        }
+    }
+
+    if (scoring_stats.parent_directory_match_distribution[STATISTICS_PARENT_DIRECTORY_MATCH_MAX] > 0)
+    {
+        printf(
+            "--------Match %u+: %llu\n",
+            STATISTICS_PARENT_DIRECTORY_MATCH_MAX,
+            (unsigned long long)scoring_stats.parent_directory_match_distribution[STATISTICS_PARENT_DIRECTORY_MATCH_MAX]
+        );
     }
 
     /** /TESTING */
