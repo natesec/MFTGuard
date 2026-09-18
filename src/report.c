@@ -14,6 +14,13 @@
  */
 static void report_timestamp(const char *label, uint64_t filetime);
 
+/**
+ * @brief Add record stats from the statistics struct to the overview object.
+ * @param overview Pointer to the overview object.
+ * @param stats Pointer to the populated statistics struct.
+ */
+static bool report_add_record_statistics(cJSON *overview, const statistics *stats);
+
 void report_record(const mft_record *record, uint32_t rule_flags)
 {
     if (record == NULL || rule_flags == RULE_NONE)
@@ -90,6 +97,58 @@ void report_record(const mft_record *record, uint32_t rule_flags)
     printf(REPORT_BANNER "\n");
 }
 
+bool report_initialize(report *report)
+{
+    if (report == NULL)
+    {
+        return false;
+    }
+
+    report->root = cJSON_CreateObject();
+
+    if (report->root == NULL)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool report_add_overview(report *report, const statistics *stats)
+{
+    if (report == NULL || report->root == NULL || stats == NULL)
+    {
+        return false;
+    }
+
+    cJSON *overview = cJSON_CreateObject();
+
+    if (overview == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(report->root, "overview", overview);
+
+    if (!report_add_record_statistics(overview, stats))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void report_free(report *report)
+{
+    if (report == NULL)
+    {
+        return;
+    }
+
+    cJSON_Delete(report->root);
+    report->root = NULL;
+}
+
 static void report_timestamp(const char *label, uint64_t filetime)
 {
     struct tm utc_time;
@@ -120,4 +179,30 @@ static void report_timestamp(const char *label, uint64_t filetime)
             ""
         );
     }
+}
+
+static bool report_add_record_statistics(cJSON *overview, const statistics *stats)
+{
+    if (overview == NULL || stats == NULL)
+    {
+        return false;
+    }
+
+    cJSON *records = cJSON_CreateObject();
+
+    if (records == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(overview, "records", records);
+
+    cJSON_AddItemToObject(records, "processed", cJSON_CreateNumber((double)stats->records_processed));
+    cJSON_AddItemToObject(records, "flagged", cJSON_CreateNumber((double)stats->records_flagged));
+    cJSON_AddItemToObject(records, "unused", cJSON_CreateNumber((double)stats->records_unused));
+    cJSON_AddItemToObject(records, "reserved", cJSON_CreateNumber((double)stats->records_reserved));
+    cJSON_AddItemToObject(records, "invalid", cJSON_CreateNumber((double)stats->records_invalid));
+    cJSON_AddItemToObject(records, "skipped", cJSON_CreateNumber((double)stats->records_skipped));
+
+    return true;
 }
