@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
 
     candidate *candidates = NULL;
 
-    //while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
-    while (mft.record_number < mft.record_count)
+    //while (mft.record_number < mft.record_count)
+    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
     {
         if (!mft_read_record(&mft))
         {

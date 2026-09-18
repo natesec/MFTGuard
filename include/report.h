@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #include "mft.h"
+#include "statistics.h"
+#include "cJSON.h"
 
 /**
  * @brief Create and output a report on a suspicious MFT record.
