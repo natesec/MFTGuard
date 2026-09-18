@@ -18,8 +18,17 @@ static void report_timestamp(const char *label, uint64_t filetime);
  * @brief Add record stats from the statistics struct to the overview object.
  * @param overview Pointer to the overview object.
  * @param stats Pointer to the populated statistics struct.
+ * @return true if successfully added record stats, false otherwise.
  */
 static bool report_add_record_statistics(cJSON *overview, const statistics *stats);
+
+/**
+ * @brief Add rule stats from the statistics struct to the overview object.
+ * @param overview Pointer to the overview object.
+ * @param stats Pointer to the populated statistics struct.
+ * @return true if successfully added rule stats, false otherwise.
+ */
+static bool report_add_rule_statistics(cJSON *overview, const statistics *stats);
 
 void report_record(const mft_record *record, uint32_t rule_flags)
 {
@@ -135,6 +144,11 @@ bool report_add_overview(report *report, const statistics *stats)
         return false;
     }
 
+    if (!report_add_rule_statistics(overview, stats))
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -203,6 +217,30 @@ static bool report_add_record_statistics(cJSON *overview, const statistics *stat
     cJSON_AddItemToObject(records, "reserved", cJSON_CreateNumber((double)stats->records_reserved));
     cJSON_AddItemToObject(records, "invalid", cJSON_CreateNumber((double)stats->records_invalid));
     cJSON_AddItemToObject(records, "skipped", cJSON_CreateNumber((double)stats->records_skipped));
+
+    return true;
+}
+
+static bool report_add_rule_statistics(cJSON *overview, const statistics *stats)
+{
+    if (overview == NULL || stats == NULL)
+    {
+        return false;
+    }
+
+    cJSON *rules = cJSON_CreateObject();
+
+    if (rules == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(overview, "rules", rules);
+
+    cJSON_AddItemToObject(rules, "si_fn_mismatch", cJSON_CreateNumber((double)stats->si_fn_mismatch_count));
+    cJSON_AddItemToObject(rules, "timestamp_rollback", cJSON_CreateNumber((double)stats->timestamp_rollback_count));
+    cJSON_AddItemToObject(rules, "zeroed_timestamp", cJSON_CreateNumber((double)stats->zeroed_timestamp_count));
+    cJSON_AddItemToObject(rules, "identical_timestamp", cJSON_CreateNumber((double)stats->identical_timestamp_count));
 
     return true;
 }
