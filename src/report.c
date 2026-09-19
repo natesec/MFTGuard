@@ -30,6 +30,14 @@ static bool report_add_record_statistics(cJSON *overview, const statistics *stat
  */
 static bool report_add_rule_statistics(cJSON *overview, const statistics *stats);
 
+/**
+ * @brief Add file name stats from the statistics struct to the overview object.
+ * @param overview Pointer to the overview object.
+ * @param stats Pointer to the populated statistics struct.
+ * @return true if successfully added file name stats, false otherwise.
+ */
+static bool report_add_file_name_statistics(cJSON *overview, const statistics *stats);
+
 void report_record(const mft_record *record, uint32_t rule_flags)
 {
     if (record == NULL || rule_flags == RULE_NONE)
@@ -149,6 +157,11 @@ bool report_add_overview(report *report, const statistics *stats)
         return false;
     }
 
+    if (!report_add_file_name_statistics(overview, stats))
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -241,6 +254,47 @@ static bool report_add_rule_statistics(cJSON *overview, const statistics *stats)
     cJSON_AddItemToObject(rules, "timestamp_rollback", cJSON_CreateNumber((double)stats->timestamp_rollback_count));
     cJSON_AddItemToObject(rules, "zeroed_timestamp", cJSON_CreateNumber((double)stats->zeroed_timestamp_count));
     cJSON_AddItemToObject(rules, "identical_timestamp", cJSON_CreateNumber((double)stats->identical_timestamp_count));
+
+    return true;
+}
+
+static bool report_add_file_name_statistics(cJSON *overview, const statistics *stats)
+{
+    if (overview == NULL || stats == NULL)
+    {
+        return false;
+    }
+
+    cJSON *file_names = cJSON_CreateObject();
+
+    if (file_names == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(overview, "file_names", file_names);
+
+    cJSON_AddItemToObject(file_names, "records", cJSON_CreateNumber((double)stats->file_name_records));
+    cJSON_AddItemToObject(file_names, "multiple_records", cJSON_CreateNumber((double)stats->multiple_file_name_records));
+    cJSON_AddItemToObject(file_names, "total", cJSON_CreateNumber((double)stats->total_file_names));
+    cJSON_AddItemToObject(file_names, "max_per_record", cJSON_CreateNumber((double)stats->max_file_names_per_record));
+
+    cJSON *distribution = cJSON_CreateObject();
+
+    if (distribution == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(file_names, "distribution", distribution);
+
+    char key[32];
+
+    for (uint32_t i = 0; i < STATISTICS_MAX_FILE_NAMES; i++)
+    {
+        snprintf(key, sizeof(key), "%u", i);
+        cJSON_AddItemToObject(distribution, key, cJSON_CreateNumber((double)stats->file_name_count_distribution[i]));
+    }
 
     return true;
 }
