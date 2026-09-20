@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
 
     candidate *candidates = NULL;
 
-    //while (mft.record_number < mft.record_count)
-    while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
+    //while (mft.record_number < mft.record_count && mft.record_number < test_record_limit)
+    while (mft.record_number < mft.record_count)
     {
         if (!mft_read_record(&mft))
         {
@@ -111,6 +111,45 @@ int main(int argc, char *argv[])
 
         mft.record_number++;
     }
+
+    /** TEST */
+
+    report report = {0};
+
+    if (!report_initialize(&report))
+    {
+        fprintf(stderr, ERROR_MARKER "failed to initialize json\n");
+        candidate_free_all(&candidates);
+        mft_close(&mft);
+        return 1;
+    }
+
+    if (!report_add_overview(&report, &stats))
+    {
+        fprintf(stderr, ERROR_MARKER "JSON: failed to add overview\n");
+        report_free(&report);
+        candidate_free_all(&candidates);
+        mft_close(&mft);
+        return 1;
+    }
+
+    char *json = cJSON_Print(report.root);
+
+    if (json == NULL)
+    {
+        fprintf(stderr, ERROR_MARKER "JSON: failed to print\n");
+        report_free(&report);
+        candidate_free_all(&candidates);
+        mft_close(&mft);
+        return 1;
+    }
+
+    printf("%s\n", json);
+
+    free(json);
+    report_free(&report);
+
+    /** /TEST */
 
     candidate_free_all(&candidates);
 
