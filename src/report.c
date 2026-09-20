@@ -38,6 +38,14 @@ static bool report_add_rule_statistics(cJSON *overview, const statistics *stats)
  */
 static bool report_add_file_name_statistics(cJSON *overview, const statistics *stats);
 
+/**
+ * @brief Add SI FN timestamp stats from the statistics struct to the overview object.
+ * @param overview Pointer to the overview object.
+ * @param stats Pointer to the populated statistics struct.
+ * @return true if successfully added SI/FN stats, false otherwise.
+ */
+static bool report_add_si_fn_statistics(cJSON *overview, const statistics *stats);
+
 void report_record(const mft_record *record, uint32_t rule_flags)
 {
     if (record == NULL || rule_flags == RULE_NONE)
@@ -158,6 +166,11 @@ bool report_add_overview(report *report, const statistics *stats)
     }
 
     if (!report_add_file_name_statistics(overview, stats))
+    {
+        return false;
+    }
+
+    if (!report_add_si_fn_statistics(overview, stats))
     {
         return false;
     }
@@ -295,6 +308,41 @@ static bool report_add_file_name_statistics(cJSON *overview, const statistics *s
         snprintf(key, sizeof(key), "%u", i);
         cJSON_AddItemToObject(distribution, key, cJSON_CreateNumber((double)stats->file_name_count_distribution[i]));
     }
+
+    return true;
+}
+
+static bool report_add_si_fn_statistics(cJSON *overview, const statistics *stats)
+{
+    if (overview == NULL || stats == NULL)
+    {
+        return false;
+    }
+
+    cJSON *si_fn_counts = cJSON_CreateObject();
+
+    if (si_fn_counts == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(overview, "si_fn_counts", si_fn_counts);
+
+    cJSON_AddItemToObject(si_fn_counts, "creation_si_before_fn", cJSON_CreateNumber((double)stats->creation_si_before_fn));
+    cJSON_AddItemToObject(si_fn_counts, "creation_si_equal_fn", cJSON_CreateNumber((double)stats->creation_si_equal_fn));
+    cJSON_AddItemToObject(si_fn_counts, "creation_si_after_fn", cJSON_CreateNumber((double)stats->creation_si_after_fn));
+
+    cJSON_AddItemToObject(si_fn_counts, "modified_si_before_fn", cJSON_CreateNumber((double)stats->modified_si_before_fn));
+    cJSON_AddItemToObject(si_fn_counts, "modified_si_equal_fn", cJSON_CreateNumber((double)stats->modified_si_equal_fn));
+    cJSON_AddItemToObject(si_fn_counts, "modified_si_after_fn", cJSON_CreateNumber((double)stats->modified_si_after_fn));
+
+    cJSON_AddItemToObject(si_fn_counts, "mft_modified_si_before_fn", cJSON_CreateNumber((double)stats->mft_modified_si_before_fn));
+    cJSON_AddItemToObject(si_fn_counts, "mft_modified_si_equal_fn", cJSON_CreateNumber((double)stats->mft_modified_si_equal_fn));
+    cJSON_AddItemToObject(si_fn_counts, "mft_modified_si_after_fn", cJSON_CreateNumber((double)stats->mft_modified_si_after_fn));
+
+    cJSON_AddItemToObject(si_fn_counts, "accessed_si_before_fn", cJSON_CreateNumber((double)stats->accessed_si_before_fn));
+    cJSON_AddItemToObject(si_fn_counts, "accessed_si_equal_fn", cJSON_CreateNumber((double)stats->accessed_si_equal_fn));
+    cJSON_AddItemToObject(si_fn_counts, "accessed_si_after_fn", cJSON_CreateNumber((double)stats->accessed_si_after_fn));
 
     return true;
 }
