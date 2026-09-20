@@ -46,6 +46,14 @@ static bool report_add_file_name_statistics(cJSON *overview, const statistics *s
  */
 static bool report_add_si_fn_statistics(cJSON *overview, const statistics *stats);
 
+/**
+ * @brief Add timestamp delta stats from the statistics struct to the overview object.
+ * @param overview Pointer to the overview object.
+ * @param stats Pointer to the populated statistics struct.
+ * @return true if successfully added delta stats, false otherwise.
+ */
+static bool report_add_delta_statistics(cJSON *overview, const statistics *stats);
+
 void report_record(const mft_record *record, uint32_t rule_flags)
 {
     if (record == NULL || rule_flags == RULE_NONE)
@@ -171,6 +179,11 @@ bool report_add_overview(report *report, const statistics *stats)
     }
 
     if (!report_add_si_fn_statistics(overview, stats))
+    {
+        return false;
+    }
+
+    if (!report_add_delta_statistics(overview, stats))
     {
         return false;
     }
@@ -328,21 +341,110 @@ static bool report_add_si_fn_statistics(cJSON *overview, const statistics *stats
 
     cJSON_AddItemToObject(overview, "si_fn_counts", si_fn_counts);
 
-    cJSON_AddItemToObject(si_fn_counts, "creation_si_before_fn", cJSON_CreateNumber((double)stats->creation_si_before_fn));
-    cJSON_AddItemToObject(si_fn_counts, "creation_si_equal_fn", cJSON_CreateNumber((double)stats->creation_si_equal_fn));
-    cJSON_AddItemToObject(si_fn_counts, "creation_si_after_fn", cJSON_CreateNumber((double)stats->creation_si_after_fn));
+    cJSON *creation = cJSON_CreateObject();
+    cJSON *modified = cJSON_CreateObject();
+    cJSON *mft_modified = cJSON_CreateObject();
+    cJSON *accessed = cJSON_CreateObject();
 
-    cJSON_AddItemToObject(si_fn_counts, "modified_si_before_fn", cJSON_CreateNumber((double)stats->modified_si_before_fn));
-    cJSON_AddItemToObject(si_fn_counts, "modified_si_equal_fn", cJSON_CreateNumber((double)stats->modified_si_equal_fn));
-    cJSON_AddItemToObject(si_fn_counts, "modified_si_after_fn", cJSON_CreateNumber((double)stats->modified_si_after_fn));
+    if (creation == NULL || modified == NULL || mft_modified == NULL || accessed == NULL)
+    {
+        return false;
+    }
 
-    cJSON_AddItemToObject(si_fn_counts, "mft_modified_si_before_fn", cJSON_CreateNumber((double)stats->mft_modified_si_before_fn));
-    cJSON_AddItemToObject(si_fn_counts, "mft_modified_si_equal_fn", cJSON_CreateNumber((double)stats->mft_modified_si_equal_fn));
-    cJSON_AddItemToObject(si_fn_counts, "mft_modified_si_after_fn", cJSON_CreateNumber((double)stats->mft_modified_si_after_fn));
+    cJSON_AddItemToObject(si_fn_counts, "creation", creation);
+    cJSON_AddItemToObject(si_fn_counts, "modified", modified);
+    cJSON_AddItemToObject(si_fn_counts, "mft_modified", mft_modified);
+    cJSON_AddItemToObject(si_fn_counts, "accessed", accessed);
 
-    cJSON_AddItemToObject(si_fn_counts, "accessed_si_before_fn", cJSON_CreateNumber((double)stats->accessed_si_before_fn));
-    cJSON_AddItemToObject(si_fn_counts, "accessed_si_equal_fn", cJSON_CreateNumber((double)stats->accessed_si_equal_fn));
-    cJSON_AddItemToObject(si_fn_counts, "accessed_si_after_fn", cJSON_CreateNumber((double)stats->accessed_si_after_fn));
+    cJSON_AddItemToObject(creation, "creation_si_before_fn", cJSON_CreateNumber((double)stats->creation_si_before_fn));
+    cJSON_AddItemToObject(creation, "creation_si_equal_fn", cJSON_CreateNumber((double)stats->creation_si_equal_fn));
+    cJSON_AddItemToObject(creation, "creation_si_after_fn", cJSON_CreateNumber((double)stats->creation_si_after_fn));
+
+    cJSON_AddItemToObject(modified, "modified_si_before_fn", cJSON_CreateNumber((double)stats->modified_si_before_fn));
+    cJSON_AddItemToObject(modified, "modified_si_equal_fn", cJSON_CreateNumber((double)stats->modified_si_equal_fn));
+    cJSON_AddItemToObject(modified, "modified_si_after_fn", cJSON_CreateNumber((double)stats->modified_si_after_fn));
+
+    cJSON_AddItemToObject(mft_modified, "mft_modified_si_before_fn", cJSON_CreateNumber((double)stats->mft_modified_si_before_fn));
+    cJSON_AddItemToObject(mft_modified, "mft_modified_si_equal_fn", cJSON_CreateNumber((double)stats->mft_modified_si_equal_fn));
+    cJSON_AddItemToObject(mft_modified, "mft_modified_si_after_fn", cJSON_CreateNumber((double)stats->mft_modified_si_after_fn));
+
+    cJSON_AddItemToObject(accessed, "accessed_si_before_fn", cJSON_CreateNumber((double)stats->accessed_si_before_fn));
+    cJSON_AddItemToObject(accessed, "accessed_si_equal_fn", cJSON_CreateNumber((double)stats->accessed_si_equal_fn));
+    cJSON_AddItemToObject(accessed, "accessed_si_after_fn", cJSON_CreateNumber((double)stats->accessed_si_after_fn));
+
+    return true;
+}
+
+static bool report_add_delta_statistics(cJSON *overview, const statistics *stats)
+{
+    if (overview == NULL || stats == NULL)
+    {
+        return false;
+    }
+
+    cJSON *timestamp_deltas = cJSON_CreateObject();
+
+    if (timestamp_deltas == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(overview, "timestamp_deltas", timestamp_deltas);
+
+    cJSON *creation = cJSON_CreateObject();
+    cJSON *modified = cJSON_CreateObject();
+    cJSON *mft_modified = cJSON_CreateObject();
+    cJSON *accessed = cJSON_CreateObject();
+
+    if (creation == NULL || modified == NULL || mft_modified == NULL || accessed == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(timestamp_deltas, "creation", creation);
+    cJSON_AddItemToObject(timestamp_deltas, "modified", modified);
+    cJSON_AddItemToObject(timestamp_deltas, "mft_modified", mft_modified);
+    cJSON_AddItemToObject(timestamp_deltas, "accessed", accessed);
+
+    cJSON_AddItemToObject(creation, "min", cJSON_CreateNumber((double)stats->creation_delta_min));
+    cJSON_AddItemToObject(creation, "max", cJSON_CreateNumber((double)stats->creation_delta_max));
+    cJSON_AddItemToObject(creation, "count", cJSON_CreateNumber((double)stats->creation_delta_count));
+    cJSON_AddItemToObject(creation, "over_1s", cJSON_CreateNumber((double)stats->creation_delta_over_1s));
+    cJSON_AddItemToObject(creation, "over_1m", cJSON_CreateNumber((double)stats->creation_delta_over_1m));
+    cJSON_AddItemToObject(creation, "over_1h", cJSON_CreateNumber((double)stats->creation_delta_over_1h));
+    cJSON_AddItemToObject(creation, "over_1d", cJSON_CreateNumber((double)stats->creation_delta_over_1d));
+    cJSON_AddItemToObject(creation, "over_1w", cJSON_CreateNumber((double)stats->creation_delta_over_1w));
+    cJSON_AddItemToObject(creation, "over_30d", cJSON_CreateNumber((double)stats->creation_delta_over_30d));
+
+    cJSON_AddItemToObject(modified, "min", cJSON_CreateNumber((double)stats->modified_delta_min));
+    cJSON_AddItemToObject(modified, "max", cJSON_CreateNumber((double)stats->modified_delta_max));
+    cJSON_AddItemToObject(modified, "count", cJSON_CreateNumber((double)stats->modified_delta_count));
+    cJSON_AddItemToObject(modified, "over_1s", cJSON_CreateNumber((double)stats->modified_delta_over_1s));
+    cJSON_AddItemToObject(modified, "over_1m", cJSON_CreateNumber((double)stats->modified_delta_over_1m));
+    cJSON_AddItemToObject(modified, "over_1h", cJSON_CreateNumber((double)stats->modified_delta_over_1h));
+    cJSON_AddItemToObject(modified, "over_1d", cJSON_CreateNumber((double)stats->modified_delta_over_1d));
+    cJSON_AddItemToObject(modified, "over_1w", cJSON_CreateNumber((double)stats->modified_delta_over_1w));
+    cJSON_AddItemToObject(modified, "over_30d", cJSON_CreateNumber((double)stats->modified_delta_over_30d));
+
+    cJSON_AddItemToObject(mft_modified, "min", cJSON_CreateNumber((double)stats->mft_modified_delta_min));
+    cJSON_AddItemToObject(mft_modified, "max", cJSON_CreateNumber((double)stats->mft_modified_delta_max));
+    cJSON_AddItemToObject(mft_modified, "count", cJSON_CreateNumber((double)stats->mft_modified_delta_count));
+    cJSON_AddItemToObject(mft_modified, "over_1s", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1s));
+    cJSON_AddItemToObject(mft_modified, "over_1m", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1m));
+    cJSON_AddItemToObject(mft_modified, "over_1h", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1h));
+    cJSON_AddItemToObject(mft_modified, "over_1d", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1d));
+    cJSON_AddItemToObject(mft_modified, "over_1w", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1w));
+    cJSON_AddItemToObject(mft_modified, "over_30d", cJSON_CreateNumber((double)stats->mft_modified_delta_over_30d));
+
+    cJSON_AddItemToObject(accessed, "min", cJSON_CreateNumber((double)stats->accessed_delta_min));
+    cJSON_AddItemToObject(accessed, "max", cJSON_CreateNumber((double)stats->accessed_delta_max));
+    cJSON_AddItemToObject(accessed, "count", cJSON_CreateNumber((double)stats->accessed_delta_count));
+    cJSON_AddItemToObject(accessed, "over_1s", cJSON_CreateNumber((double)stats->accessed_delta_over_1s));
+    cJSON_AddItemToObject(accessed, "over_1m", cJSON_CreateNumber((double)stats->accessed_delta_over_1m));
+    cJSON_AddItemToObject(accessed, "over_1h", cJSON_CreateNumber((double)stats->accessed_delta_over_1h));
+    cJSON_AddItemToObject(accessed, "over_1d", cJSON_CreateNumber((double)stats->accessed_delta_over_1d));
+    cJSON_AddItemToObject(accessed, "over_1w", cJSON_CreateNumber((double)stats->accessed_delta_over_1w));
+    cJSON_AddItemToObject(accessed, "over_30d", cJSON_CreateNumber((double)stats->accessed_delta_over_30d));
 
     return true;
 }
