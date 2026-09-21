@@ -3,6 +3,7 @@
 #include "report.h"
 #include "rules.h"
 #include "timestamps.h"
+#include "candidate.h"
 
 #define RULE_MARKER "----"
 #define REPORT_BANNER "-------------------------------------------------\n"
@@ -53,6 +54,14 @@ static bool report_add_si_fn_statistics(cJSON *overview, const statistics *stats
  * @return true if successfully added delta stats, false otherwise.
  */
 static bool report_add_delta_statistics(cJSON *overview, const statistics *stats);
+
+/**
+ * @brief Write unformatted candidate information to the JSON report file.
+ * @param output Pointer to an open FILE stream where the candidate will be written.
+ * @param candidate Pointer to the populated candidate struct to be written.
+ * @return true if candidate was printed to the file stream, false otherwise.
+ */
+static bool report_write_candidate(FILE *output, const candidate *candidate);
 
 void report_record(const mft_record *record, uint32_t rule_flags)
 {
@@ -445,6 +454,43 @@ static bool report_add_delta_statistics(cJSON *overview, const statistics *stats
     cJSON_AddItemToObject(accessed, "over_1d", cJSON_CreateNumber((double)stats->accessed_delta_over_1d));
     cJSON_AddItemToObject(accessed, "over_1w", cJSON_CreateNumber((double)stats->accessed_delta_over_1w));
     cJSON_AddItemToObject(accessed, "over_30d", cJSON_CreateNumber((double)stats->accessed_delta_over_30d));
+
+    return true;
+}
+
+static bool report_write_candidate(FILE *output, const candidate *candidate)
+{
+    if (output == NULL || candidate == NULL)
+    {
+        return false;
+    }
+
+    cJSON *object = cJSON_CreateObject();
+
+    if (object == NULL)
+    {
+        return false;
+    }
+
+    /** CANDIDATE FIELD HELPER FUNCTIONS */
+
+    char *json = cJSON_PrintUnformatted(object);
+
+    if (json == NULL)
+    {
+        cJSON_Delete(object);
+        return false;
+    }
+
+    if (fputs(json, output) == EOF)
+    {
+        free(json);
+        cJSON_Delete(object);
+        return false;
+    }
+
+    free(json);
+    cJSON_Delete(object);
 
     return true;
 }
