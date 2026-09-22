@@ -70,6 +70,16 @@ static bool report_write_candidate(FILE *output, const candidate *candidate);
  */
 static bool report_add_candidate_si(cJSON *si, const candidate *candidate);
 
+/**
+ * @brief Add both a FILETIME timestamp and converted UTC datetime to a cJSON object.
+ * @param object Pointer to the cJSON object.
+ * @param raw_name Pointer to the desired FILETIME timestamp name.
+ * @param utc_name Pointer to the desired UTC datetime name.
+ * @param filetime uint54_t filetime value to be added.
+ * @return true if successfully added the FILETIME and UTC datetime to the object, false otherwise.
+ */
+static bool report_add_filetime(cJSON *object, const char *raw_name, const char *utc_name, uint64_t filetime);
+
 void report_record(const mft_record *record, uint32_t rule_flags)
 {
     if (record == NULL || rule_flags == RULE_NONE)
@@ -572,6 +582,8 @@ static bool report_write_candidate(FILE *output, const candidate *candidate)
         cJSON_AddItemToObject(object, "standard_information", si);
     }
 
+    cJSON_AddItemToObject(object, "file_name_count", cJSON_CreateNumber((double)candidate->file_name_count));
+
     /** /HELPER FUNCTIONS */
 
     char *json = cJSON_PrintUnformatted(object);
@@ -602,17 +614,52 @@ static bool report_add_candidate_si(cJSON *si, const candidate *candidate)
         return false;
     }
 
+    if (!report_add_filetime(si, "creation_time", "creation_time_utc", candidate->si.creation_time))
+    {
+        return false;
+    }
+
+    if (!report_add_filetime(si, "modified_time", "modified_time_utc", candidate->si.modified_time))
+    {
+        return false;
+    }
+
+    if (!report_add_filetime(si, "mft_modified_time", "mft_modified_time_utc", candidate->si.mft_modified_time))
+    {
+        return false;
+    }
+
+    if (!report_add_filetime(si, "accessed_time", "accessed_time_utc", candidate->si.accessed_time))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static bool report_add_filetime(cJSON *object, const char *raw_name, const char *utc_name, uint64_t filetime)
+{
+    if (object == NULL || raw_name == NULL || utc_name == NULL)
+    {
+        return false;
+    }
+
     struct tm tm_utc;
     char iso8601_str[25];
-
     char filetime_buffer[32];
 
-    /** CREATION TIME */
-    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)candidate->si.creation_time);
-    
-    cJSON_AddItemToObject(si, "creation_time", cJSON_CreateString(filetime_buffer));
+    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)filetime);
 
-    if (!filetime_to_utc(candidate->si.creation_time, &tm_utc))
+    cJSON *raw_time = cJSON_CreateString(filetime_buffer);
+
+    if (raw_time == NULL)
+    {
+        return false;
+    }
+
+    cJSON_AddItemToObject(object, raw_name, raw_time);
+
+    if (!filetime_to_utc(filetime, &tm_utc))
     {
         return false;
     }
@@ -622,61 +669,14 @@ static bool report_add_candidate_si(cJSON *si, const candidate *candidate)
         return false;
     }
 
-    cJSON_AddItemToObject(si, "creation_time_utc", cJSON_CreateString(iso8601_str));
+    cJSON *utc_time = cJSON_CreateString(iso8601_str);
 
-    /** MODIFIED TIME */
-
-    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)candidate->si.modified_time);
-
-    cJSON_AddItemToObject(si, "modified_time", cJSON_CreateString(filetime_buffer));
-
-    if (!filetime_to_utc(candidate->si.modified_time, &tm_utc))
+    if (utc_time == NULL)
     {
         return false;
     }
 
-    if (strftime(iso8601_str, sizeof(iso8601_str), "%Y-%m-%dT%H:%M:%SZ", &tm_utc) == 0)
-    {
-        return false;
-    }
-
-    cJSON_AddItemToObject(si, "modified_time_utc", cJSON_CreateString(iso8601_str));
-
-    /** MFT_MODIFIED TIME */
-
-    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)candidate->si.mft_modified_time);
-
-    cJSON_AddItemToObject(si, "mft_modified_time", cJSON_CreateString(filetime_buffer));
-
-    if (!filetime_to_utc(candidate->si.mft_modified_time, &tm_utc))
-    {
-        return false;
-    }
-
-    if (strftime(iso8601_str, sizeof(iso8601_str), "%Y-%m-%dT%H:%M:%SZ", &tm_utc) == 0)
-    {
-        return false;
-    }
-
-    cJSON_AddItemToObject(si, "mft_modified_time_utc", cJSON_CreateString(iso8601_str));
-
-    /** ACCESSED TIME */
-
-    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)candidate->si.accessed_time);
-
-    cJSON_AddItemToObject(si, "accessed_time", cJSON_CreateString(filetime_buffer));
-
-    if (!filetime_to_utc(candidate->si.accessed_time, &tm_utc))
-    {
-        return false;
-    }
-
-    if (strftime(iso8601_str, sizeof(iso8601_str), "%Y-%m-%dT%H:%M:%SZ", &tm_utc) == 0)
-    {
-        return false;
-    }
-
-    cJSON_AddItemToObject(si, "accessed_time_utc", cJSON_CreateString(iso8601_str));
+    cJSON_AddItemToObject(object, utc_name, utc_time);
 
     return true;
 }
