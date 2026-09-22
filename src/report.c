@@ -71,6 +71,14 @@ static bool report_write_candidate(FILE *output, const candidate *candidate);
 static bool report_add_candidate_si(cJSON *si, const candidate *candidate);
 
 /**
+ * @brief Creates a JSON array for candidate FN data and adds the array to a cJSON object.
+ * @param object Pointer to the cJSON object to add the array to.
+ * @param candidate Pointer to the populated candidate struct.
+ * @return true if successfully added all file_name_information struct values, false otherwise.
+ */
+static bool report_add_candidate_file_names(cJSON *object, const candidate *candidate);
+
+/**
  * @brief Add both a FILETIME timestamp and converted UTC datetime to a cJSON object.
  * @param object Pointer to the cJSON object.
  * @param raw_name Pointer to the desired FILETIME timestamp name.
@@ -584,6 +592,12 @@ static bool report_write_candidate(FILE *output, const candidate *candidate)
 
     cJSON_AddItemToObject(object, "file_name_count", cJSON_CreateNumber((double)candidate->file_name_count));
 
+    if (!report_add_candidate_file_names(object, candidate))
+    {
+        cJSON_Delete(object);
+        return false;
+    }
+
     /** /HELPER FUNCTIONS */
 
     char *json = cJSON_PrintUnformatted(object);
@@ -633,6 +647,92 @@ static bool report_add_candidate_si(cJSON *si, const candidate *candidate)
     {
         return false;
     }
+
+    return true;
+}
+
+static bool report_add_candidate_file_names(cJSON *object, const candidate *candidate)
+{
+    if (object == NULL || candidate == NULL)
+    {
+        return false;
+    }
+
+    cJSON *file_names = cJSON_CreateArray();
+
+    if (file_names == NULL)
+    {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < candidate->file_name_count; i++)
+    {
+        cJSON *file_name = cJSON_CreateObject();
+
+        if (file_name == NULL)
+        {
+            return false;
+        }
+
+        const file_name_information *fn = &candidate->file_names[i];
+
+        cJSON_AddItemToObject(file_name, "parent_directory", cJSON_CreateNumber((double)fn->parent_directory));
+
+        if (!report_add_filetime(file_name, "creation_time", "creation_time_utc", fn->creation_time))
+        {
+            cJSON_Delete(file_name);
+            cJSON_Delete(file_names);
+            return false;   
+        }
+
+        if (!report_add_filetime(file_name, "modified_time", "modified_time_utc", fn->modified_time))
+        {
+            cJSON_Delete(file_name);
+            cJSON_Delete(file_names);
+            return false;
+        }
+
+        if (!report_add_filetime(file_name, "mft_modified_time", "mft_modified_time_utc", fn->mft_modified_time))
+        {
+            cJSON_Delete(file_name);
+            cJSON_Delete(file_names);
+            return false;
+        }
+
+        if (!report_add_filetime(file_name, "accessed_time", "accessed_time_utc", fn->accessed_time))
+        {
+            cJSON_Delete(file_name);
+            cJSON_Delete(file_names);
+            return false;
+        }
+
+        cJSON_AddItemToObject(file_name, "allocated_size", cJSON_CreateNumber((double)fn->allocated_size));
+        cJSON_AddItemToObject(file_name, "used_size", cJSON_CreateNumber((double)fn->used_size));
+        cJSON_AddItemToObject(file_name, "flags", cJSON_CreateNumber((double)fn->flags));
+        cJSON_AddItemToObject(file_name, "reparse_and_ea", cJSON_CreateNumber((double)fn->reparse_and_ea));
+        cJSON_AddItemToObject(file_name, "filename_namespace", cJSON_CreateNumber((double)fn->filename_namespace));
+        
+        char *filename = malloc((size_t)fn->filename_length + 1);
+
+        if (filename == NULL)
+        {
+            cJSON_Delete(file_name);
+            cJSON_Delete(file_names);
+            return false;
+        }
+
+        memcpy(filename, fn->filename, fn->filename_length);
+
+        filename[fn->filename_length] = '\0';
+
+        cJSON_AddItemToObject(file_name, "filename", cJSON_CreateString(filename));
+
+        free(filename);
+
+        cJSON_AddItemToArray(file_names, file_name);
+    }
+
+    cJSON_AddItemToObject(object, "file_names", file_names);
 
     return true;
 }
