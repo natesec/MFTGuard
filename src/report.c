@@ -3,7 +3,6 @@
 #include "report.h"
 #include "rules.h"
 #include "timestamps.h"
-#include "candidate.h"
 
 #define RULE_MARKER "----"
 #define REPORT_BANNER "-------------------------------------------------\n"
@@ -201,6 +200,74 @@ bool report_add_overview(report *report, const statistics *stats)
     }
 
     if (!report_add_delta_statistics(overview, stats))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool report_write(const report *report, const candidate *candidates, const char *filename)
+{
+    if (report == NULL || report->root == NULL || filename == NULL)
+    {
+        return false;
+    }
+
+    FILE *output = fopen(filename, "w");
+
+    if (output == NULL)
+    {
+        return false;
+    }
+
+    cJSON *overview = cJSON_GetObjectItemCaseSensitive(report->root, "overview");
+
+    if (overview == NULL)
+    {
+        fclose(output);
+        return false;
+    }
+
+    char *overview_json = cJSON_PrintUnformatted(overview);
+
+    if (overview_json == NULL)
+    {
+        fclose(output);
+        return false;
+    }
+
+
+    if (fputs("{\n", output) == EOF ||
+        fputs("  \"overview\": ", output) == EOF ||
+        fputs(overview_json, output) == EOF ||
+        fputs(",\n", output) == EOF ||
+        fputs("  \"candidates\": [\n", output) == EOF)
+    {
+        free(overview_json);
+        fclose(output);
+        return false;
+    }
+
+    free(overview_json);
+
+    if (candidates != NULL)
+    {
+        if (!report_write_candidate(output, candidates))
+        {
+            fclose(output);
+            return false;
+        }
+    }
+
+    if (fputs("\n  ]\n", output) == EOF ||
+        fputs("}\n", output) == EOF)
+    {
+        fclose(output);
+        return false;
+    }
+
+    if (fclose(output) != 0)
     {
         return false;
     }
@@ -480,6 +547,10 @@ static bool report_write_candidate(FILE *output, const candidate *candidate)
         return false;
     }
 
+    cJSON_AddItemToObject(object, "record_number", cJSON_CreateNumber((double)candidate->record_number));
+    cJSON_AddItemToObject(object, "rule_flags", cJSON_CreateNumber((double)candidate->rule_flags));
+    cJSON_AddItemToObject(object, "has_standard_information", cJSON_CreateBool(candidate->has_standard_information));
+
     /** CANDIDATE FIELD HELPER FUNCTIONS */
 
     if (candidate->has_standard_information)
@@ -497,6 +568,8 @@ static bool report_write_candidate(FILE *output, const candidate *candidate)
             cJSON_Delete(object);
             return false;
         }
+
+        cJSON_AddItemToObject(object, "standard_information", si);
     }
 
     /** /HELPER FUNCTIONS */
@@ -532,8 +605,12 @@ static bool report_add_candidate_si(cJSON *si, const candidate *candidate)
     struct tm tm_utc;
     char iso8601_str[25];
 
-    /** TODO: include datetime AND FILETIME */
-    cJSON_AddItemToObject(si, "creation_time", cJSON_CreateString(candidate->si.creation_time));
+    char filetime_buffer[32];
+
+    /** CREATION TIME */
+    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)candidate->si.creation_time);
+    
+    cJSON_AddItemToObject(si, "creation_time", cJSON_CreateString(filetime_buffer));
 
     if (!filetime_to_utc(candidate->si.creation_time, &tm_utc))
     {
@@ -544,10 +621,14 @@ static bool report_add_candidate_si(cJSON *si, const candidate *candidate)
     {
         return false;
     }
-    
+
     cJSON_AddItemToObject(si, "creation_time_utc", cJSON_CreateString(iso8601_str));
 
-    cJSON_AddItemToObject(si, "modified_time", cJSON_CreateString(candidate->si.modified_time));
+    /** MODIFIED TIME */
+
+    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)candidate->si.modified_time);
+
+    cJSON_AddItemToObject(si, "modified_time", cJSON_CreateString(filetime_buffer));
 
     if (!filetime_to_utc(candidate->si.modified_time, &tm_utc))
     {
@@ -561,7 +642,11 @@ static bool report_add_candidate_si(cJSON *si, const candidate *candidate)
 
     cJSON_AddItemToObject(si, "modified_time_utc", cJSON_CreateString(iso8601_str));
 
-    cJSON_AddItemToObject(si, "mft_modified_time", cJSON_CreateString(candidate->si.mft_modified_time));
+    /** MFT_MODIFIED TIME */
+
+    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)candidate->si.mft_modified_time);
+
+    cJSON_AddItemToObject(si, "mft_modified_time", cJSON_CreateString(filetime_buffer));
 
     if (!filetime_to_utc(candidate->si.mft_modified_time, &tm_utc))
     {
@@ -575,7 +660,11 @@ static bool report_add_candidate_si(cJSON *si, const candidate *candidate)
 
     cJSON_AddItemToObject(si, "mft_modified_time_utc", cJSON_CreateString(iso8601_str));
 
-    cJSON_AddItemToObject(si, "accessed_time", cJSON_CreateString(candidate->si.accessed_time));
+    /** ACCESSED TIME */
+
+    snprintf(filetime_buffer, sizeof(filetime_buffer), "%llu", (unsigned long long)candidate->si.accessed_time);
+
+    cJSON_AddItemToObject(si, "accessed_time", cJSON_CreateString(filetime_buffer));
 
     if (!filetime_to_utc(candidate->si.accessed_time, &tm_utc))
     {

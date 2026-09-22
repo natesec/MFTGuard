@@ -7,6 +7,7 @@
 #include "mft.h"
 #include "statistics.h"
 #include "cJSON.h"
+#include "candidate.h"
 
 /**
  * @brief Represents a cJSON root object.
@@ -42,5 +43,14 @@ bool report_add_overview(report *report, const statistics *stats);
  * @param report Pointer to the report structure to be cleared.
  */
 void report_free(report *report);
+
+/**
+ * @brief Write overview, then call candidate helper to write to the specified JSON file.
+ * @param report Pointer to the report struct containing the root.
+ * @param candidates Pointer to the populated candidate hash table.
+ * @param filename Pointer to the filename to write to.
+ * @return true if successfully wrote all candidates, false otherwise.
+ */
+bool report_write(const report *report, const candidate *candidates, const char *filename);
 
 #endif

@@ -133,20 +133,16 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    char *json = cJSON_Print(report.root);
-
-    if (json == NULL)
+    
+    if (!report_write(&report, candidates, "mftguard_report.json"))
     {
-        fprintf(stderr, ERROR_MARKER "JSON: failed to print\n");
+        fprintf(stderr, ERROR_MARKER "JSON: failed to write report\n");
         report_free(&report);
         candidate_free_all(&candidates);
         mft_close(&mft);
         return 1;
     }
 
-    printf("%s\n", json);
-
-    free(json);
     report_free(&report);
 
     /** /TEST */
