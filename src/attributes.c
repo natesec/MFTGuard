@@ -284,10 +284,23 @@ static bool attribute_parse_file_name(const uint8_t *value, uint32_t value_lengt
         return false;
     }
 
+    if (value_length < 0x42)
+    {
+        fprintf(stderr, ERROR_MARKER "$FN parsing failed: value too small\n");
+    }
+
+    fn->parent_directory = read_u64_le(value + 0x00);
+
     fn->creation_time = read_u64_le(value + 0x08);
     fn->modified_time = read_u64_le(value + 0x10);
     fn->mft_modified_time = read_u64_le(value + 0x18);
     fn->accessed_time = read_u64_le(value + 0x20);
+
+    fn->allocated_size = read_u64_le(value + 0x28);
+    fn->used_size = read_u64_le(value + 0x30);
+
+    fn->flags = read_u32_le(value + 0x38);
+    fn->reparse_and_ea = read_u32_le(value + 0x3C);
 
     fn->filename_length = value[0x40];
     fn->filename_namespace = value[0x41];
