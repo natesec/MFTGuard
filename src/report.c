@@ -4,6 +4,7 @@
 #include "rules.h"
 #include "timestamps.h"
 #include "uthash.h"
+#include "utils.h"
 
 #define RULE_MARKER "----"
 #define REPORT_BANNER "-------------------------------------------------\n"
@@ -734,7 +735,7 @@ static bool report_add_candidate_file_names(cJSON *object, const candidate *cand
         cJSON_AddItemToObject(file_name, "reparse_and_ea", cJSON_CreateNumber((double)fn->reparse_and_ea));
         cJSON_AddItemToObject(file_name, "filename_namespace", cJSON_CreateNumber((double)fn->filename_namespace));
         
-        char *filename = malloc((size_t)fn->filename_length + 1);
+        char *filename = utf16le_to_utf8(fn->filename, fn->filename_length);
 
         if (filename == NULL)
         {
@@ -742,10 +743,6 @@ static bool report_add_candidate_file_names(cJSON *object, const candidate *cand
             cJSON_Delete(file_names);
             return false;
         }
-
-        memcpy(filename, fn->filename, fn->filename_length);
-
-        filename[fn->filename_length] = '\0';
 
         cJSON_AddItemToObject(file_name, "filename", cJSON_CreateString(filename));
 

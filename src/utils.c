@@ -1,3 +1,7 @@
+#include <windows.h>
+#include <stdint.h>
+#include <stdlib.h>
+
 #include "utils.h"
 
 
@@ -48,4 +52,57 @@ uint64_t read_u64_le(const uint8_t *buffer)
         | ((uint64_t)buffer[5] << 40)
         | ((uint64_t)buffer[6] << 48)
         | ((uint64_t)buffer[7] << 56);
+}
+
+/** ANNOYING conversion necessary for JSON output */
+char *utf16le_to_utf8(const uint8_t *input, uint8_t length)
+{
+    if (input == NULL | length == 0)
+    {
+        return NULL;
+    }
+
+    int utf8_length = WideCharToMultiByte(
+        CP_UTF8,
+        0,
+        (const wchar_t *)input,
+        length,
+        NULL,
+        0,
+        NULL,
+        NULL
+    );
+
+    if (utf8_length <= 0)
+    {
+        return NULL;
+    }
+
+    char *output = malloc((size_t)utf8_length + 1);
+
+    if (output == NULL)
+    {
+        return NULL;
+    }
+
+    int result = WideCharToMultiByte(
+        CP_UTF8,
+        0,
+        (const wchar_t *)input,
+        length,
+        output,
+        utf8_length,
+        NULL,
+        NULL
+    );
+
+    if (result != utf8_length)
+    {
+        free(output);
+        return NULL;
+    }
+
+    output[utf8_length] = '\0';
+
+    return output;
 }
