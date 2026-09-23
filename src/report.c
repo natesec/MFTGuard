@@ -3,6 +3,7 @@
 #include "report.h"
 #include "rules.h"
 #include "timestamps.h"
+#include "uthash.h"
 
 #define RULE_MARKER "----"
 #define REPORT_BANNER "-------------------------------------------------\n"
@@ -271,10 +272,31 @@ bool report_write(const report *report, const candidate *candidates, const char 
 
     if (candidates != NULL)
     {
-        if (!report_write_candidate(output, candidates))
+        candidate *current;
+        candidate *tmp;
+        bool first_candidate = true;
+
+        /** Local cast to avoid const compiler warning */
+        candidate *hash_candidates = (candidate *)candidates;
+
+        HASH_ITER(hh, hash_candidates, current, tmp)
         {
-            fclose(output);
-            return false;
+            if (!first_candidate)
+            {
+                if (fputs(",\n", output) == EOF)
+                {
+                    fclose(output);
+                    return false;
+                }
+            }
+
+            if (!report_write_candidate(output, current))
+            {
+                fclose(output);
+                return false;
+            }
+
+            first_candidate = false;
         }
     }
 
