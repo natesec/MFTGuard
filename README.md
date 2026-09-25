@@ -8,6 +8,28 @@ MFTGuard is a C-based DFIR tool designed to identify NTFS Master File Table reco
 
 The goal of this project is not to automatically declare a file as a definite result of timestomping. Instead, MFTGuard is an investigative triage tool: it reduces the number of MFT records an investigator needs to examine and provides structured evidence that can be correlated with independent forensic artifacts. This not only saves time and resources, it also allows investigators to perform much deeper analysis of MFT records that are sure to require it.
 
+## Table of Contents
+
+1. [Installation and Usage](#installation--usage)
+    - [Requirements](#requirements)
+    - [Build](#build)
+    - [Input](#input)
+    - [Usage](#usage)
+2. [Key Features](#key-features)
+    - [MFT Parsing](#mft-parsing)
+    - [NTFS Fixup / Update Sequence Arrays](#ntfs-fixup--update-sequence-arrays)
+    - [Attribute Parsing](#attribute-parsing)
+    - [Timestamp Analysis](#timestamp-analysis)
+    - [Statistical Analysis](#statistical-analysis)
+    - [Hash Table Candidate Management](#hash-table-candidate-management)
+    - [JSON Reporting](#json-reporting)
+    - [Performance](#performance)
+3. [Lessons Learned](#lessons-learned)
+    - [The MFT Contains Significant Noise](#the-mft-contains-significant-noise)
+    - [Correlation Is Essential](#correlation-is-essential)
+4. [Disclaimer](#disclaimer)
+5. [Libraries](#libraries)
+6. [License](#license)
 
 ## Installation & Usage
 
@@ -311,6 +333,16 @@ NTFS metadata naturally contains a large amount of variation. Differences in `$F
 
 To reduce the false-positive rate, I initially explored increasingly restrictive combinations of timestamp relationships and statistical thresholds in an attempt to reduce this noise. Through testing, the estimated false-positive rate was reduced from approximately 22% to 16%. While this represented an improvement in the behavior of the detection rules, it also demonstrated an important limitation: increasingly complex rules applied to the MFT alone could not reliably distinguish malicious manipulation from legitimate filesystem behavior.
 
+Testing against a clean MFT produced the following results initially:
+
+| Detection Condition | Percentage of Records |
+|---------------------|-----------------------|
+| SI/FN timestamp mismatch | 15.66% |
+| Zeroed timestamps | 6.00% |
+| Identical timestamps | 11.67% |
+
+Attempted candidate scoring also fell short. While testing a score based on clustered timestamps: 29.96% of all candidates (134,177) were in a cluster of 10,000 or more. Analyzing the parent directory of candidates produced a similar result, although slightly more promising: 978 candidates did not share a parent directory with any other candidate. Overall, the candidate scoring system was not deemed useful and also had a very costly toll when it came to resources and time.
+
 This changed the direction of the project. Instead of trying to detect timestomping, the tool was redesigned around forensic triage and evidence correlation.
 
 ### Correlation Is Essential
@@ -320,16 +352,27 @@ The most promising use of MFTGuard came from treating the output as a starting p
 The final design philosophy of the project is:
 > MFTGuard points the way, independent forensic artifacts reveal what actually happened
 
-The biggest lesson from the project was therefore not how to create a more complicated detection rule. It was learning where the available evidence stops being sufficient and designing the tool to work effectively within that limitation.
-
-## Future Development
+The biggest lesson from the project was therefore not how to create a more complicated detection rule, it was learning where the available evidence stops being sufficient, and designing the tool to work effectively within that limitation.
 
 ## Disclaimer
 
+MFTGuard is intended to assists with the analysis of NTFS timestamp behavior. Its output should not be interpreted as definitive proof that timestomping or general timestamp manipulation occurred.
+
+MFTGuard analyzes information contained within the NTFS $MFT and may produce false positives due to legitimate filesystem behavior and the inherent complexity of NTFS metadata. Findings should be validated and correlated with independent forensic artifacts and other available evidence before drawing conclusions.
+
+This project is provided for educational, research, and authorized forensic analysis purposes. Only analyze systems, storage media, and forensic images for which you have appropriate authorization. I will make no guarantees regarding the completeness, accuracy, or suitability of MFTGuard for any particular forensic investigation. The tool should not replace established forensic procedures, independent evidence validation, or professional forensic judgment.
+
 ## Libraries
 
-### cJSON
+MFTGuard uses the following third-party libraries:
 
-### uthash
+1. [uthash](https://github.com/troydhanson/uthash/blob/master/src/uthash.h): for candidate hash table management
+2. [cJSON](https://github.com/DaveGamble/cJSON): for report generation
+
+Local copies of the applicable license files are included in the repository under the third_party directory.
 
 ## License
+
+Licensed under the [MIT License](/LICENSE).
+
+Third-party dependencies are distributed under their respective licenses.
