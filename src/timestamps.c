@@ -23,7 +23,6 @@ bool timestamp_is_after(uint64_t first, uint64_t second)
     return first > second;
 }
 
-/** TODO: implement after filetime to datetime conversion is complete */
 bool timestamp_low_digits_zeroed(uint64_t timestamp, uint32_t digits_zeroed)
 {
     if (digits_zeroed == 0)

@@ -526,6 +526,7 @@ static bool report_add_delta_statistics(cJSON *overview, const statistics *stats
         return false;
     }
 
+    /** TODO: fix this godawful mess */
     cJSON_AddItemToObject(timestamp_deltas, "creation", creation);
     cJSON_AddItemToObject(timestamp_deltas, "modified", modified);
     cJSON_AddItemToObject(timestamp_deltas, "mft_modified", mft_modified);
@@ -592,8 +593,6 @@ static bool report_write_candidate(FILE *output, const candidate *candidate)
     cJSON_AddItemToObject(object, "rule_flags", cJSON_CreateNumber((double)candidate->rule_flags));
     cJSON_AddItemToObject(object, "has_standard_information", cJSON_CreateBool(candidate->has_standard_information));
 
-    /** CANDIDATE FIELD HELPER FUNCTIONS */
-
     if (candidate->has_standard_information)
     {
         cJSON *si = cJSON_CreateObject();
@@ -620,8 +619,6 @@ static bool report_write_candidate(FILE *output, const candidate *candidate)
         cJSON_Delete(object);
         return false;
     }
-
-    /** /HELPER FUNCTIONS */
 
     char *json = cJSON_PrintUnformatted(object);
 

@@ -1,11 +1,8 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "mft.h"
 #include "fixup.h"
-#include "attributes.h"
-/** Little-endian conversion */
 #include "utils.h"
 
 #define MFT_RECORD_FLAG_IN_USE 0x0001

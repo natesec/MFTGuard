@@ -148,8 +148,6 @@ bool attributes_walk(
 
             value = record + offset + resident_header.value_offset;
 
-            /** standard_information si; **/
-
             if (!attribute_parse_standard_information(value, resident_header.value_length, &metadata->si))
             {
                 return false;
