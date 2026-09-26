@@ -75,7 +75,8 @@ bool attributes_walk(
 
         if (record_size - offset < ATTRIBUTE_DEFAULT_HEADER_SIZE)
         {
-            fprintf(stderr, ERROR_MARKER "attribute walk failed: incomplete attr header\n");
+            /** Too many malformed headers, spams cli */
+            //fprintf(stderr, ERROR_MARKER "attribute walk failed: incomplete attr header\n");
             return false;
         }
 

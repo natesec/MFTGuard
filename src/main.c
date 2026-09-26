@@ -126,6 +126,8 @@ int main(int argc, char *argv[])
     }
 
     
+    printf(MESSAGE_MARKER "Generating JSON report\n");
+
     if (!report_write(&report, candidates, "mftguard_report.json"))
     {
         fprintf(stderr, ERROR_MARKER "JSON: failed to write report\n");
@@ -134,6 +136,8 @@ int main(int argc, char *argv[])
         mft_close(&mft);
         return 1;
     }
+
+    printf(SUCCESS_MARKER "JSON report complete\n");
 
     report_free(&report);
     candidate_free_all(&candidates);
