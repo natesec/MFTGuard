@@ -135,20 +135,20 @@ The fixup implementation operates directly on the MFT record buffer, reconstruct
 
 ### Attribute Parsing
 
-The NTFS attributes list is walked and parsed for each record to extract the main metadata required for timestamp analysis. The parser currently supports `$STANDARD_INFORMATION` (`$SI`) and `FILE_NAME` (`$FN`) attribute types.
+The NTFS attributes list is walked and parsed for each record to extract the main metadata required for timestamp analysis. The parser currently supports `$STANDARD_INFORMATION` (`$SI`) and `$FILE_NAME` (`$FN`) attribute types.
 
 During the attribute walk, attribute lengths and boundaries are validated before reading the contents. Attribute headers and resident attribute headers are parsed separately using fixed offsets. For each supported attribute, MFTGuard extracts the relevant fields and stores them using dedicated little-endian readers. For example:
 ```C
 si->creation_time = read_u64_le(value + 0x00);
 ```
 
-For `$STANDARD_INFORMATION` attribute, only one per record is supported. The timestamp fields are parsed and stored in the `record_metadata` struct.
+For the `$STANDARD_INFORMATION` attributes, only one per record is supported. The timestamp fields are parsed and stored in the `record_metadata` struct.
 
-For `FILE_NAME` attributes, there can be one, multiple, or none for each record. The distribution of `FILE_NAME` counts is collected in the statistics struct and later included in the JSON report. All instances present are stored in the `record_metadata` struct to preserve all relevant data for later timestamp analysis.
+For `$FILE_NAME` attributes, there can be one, multiple, or none for each record. The distribution of `$FILE_NAME` counts is collected in the statistics struct and later included in the JSON report. All instances present are stored in the `record_metadata` struct to preserve all relevant data for later timestamp analysis.
 
-Here is an example of the `FILE_NAME` count distribution from my sample $MFT:
+Here is an example of the `$FILE_NAME` count distribution from a sample $MFT extracted from a fresh Windows 11 install:
 
-| `FILE_NAME` Count | Instances |
+| `$FILE_NAME` Count | Instances |
 |-------------------|-----------|
 | 0 | 4586 |
 | 1 | 161140 |
@@ -162,7 +162,7 @@ As you can see, the vast majority of records have multiple `FN` attributes. Usua
 
 ### Timestamp Analysis
 
-MFTGuard evaluates the timestamp metadata extracted from the `$STANDARD_INFORMATION` and `$FILE_NAME` attributes using a defined set of detection rules. These rules were honed using statistics on several MFT artifact samples extracted from virtual machines. Rather than treating a single timestamp discrepancy as definitive evidence of timestamp manipulation, the rules identify records exhibiting complex timestamp relationships that warrant further analysis. Rules are often evaluated in combination to eachother and with variable thresholds. A single record can trigger multiple rules.
+MFTGuard evaluates the timestamp metadata extracted from the `$STANDARD_INFORMATION` and `$FILE_NAME` attributes using a defined set of detection rules. These rules were honed using statistics on several MFT artifact samples extracted from Windows 11 virtual machines. Rather than treating a single timestamp discrepancy as definitive evidence of timestamp manipulation, the rules identify records exhibiting complex timestamp relationships that warrant further analysis. Rules are often evaluated in combination to eachother and with variable thresholds. A single record can trigger multiple rules.
 
 For each parsed record, the rule functions evaluate the metadata and return a bitmask. An enum is used to store the flags of each rule in the form of a bit position (each rule undergoes a left bit shift according to its order in the enum). Once every rule has been evaluated, the flags undergo a bitwise `OR` operation to collapse into a single bitmask, retaining all rule-based detection data efficiently.
 
@@ -182,7 +182,7 @@ rule_flags |= RULE_FLAG(RULE_ZEROED_TIMESTAMP);
 rule_flags |= RULE_FLAG(RULE_IDENTICAL_TIMESTAMPS);
 ```
 
-This bitmask is then stored with the respective record for later candidate analysis and reporting.
+This bitmask is then stored in the respective record `candidate` struct as the `rule_flags` field for later analysis and reporting.
 
 ### Statistical Analysis
 
@@ -203,11 +203,11 @@ Additionally, `$FILE_NAME` statistics are collected:
 - Maximum number of `$FILE_NAME` attributes in a single record
 - Distribution of `$FILE_NAME` counts per record
 
-For timestamp relationship statistics, the following counts are collected for both the `$STANDARD_INFORMATION` and `$FILE_NAME` timestamps for each field (creation, modified, MFT-modified, and accessed)
+For timestamp relationship statistics, the following counts are collected for both the `$STANDARD_INFORMATION` and `$FILE_NAME` timestamps, including each field (creation, modified, MFT-modified, and accessed):
 
-- Before corresponding `$FILE_NAME` value
-- At the same time as the corresponding `$FILE_NAME` value
-- After the corresponding `$FILE_NAME` value
+- `STANDARD_INFORMATION` value before the corresponding `$FILE_NAME` value
+- `STANDARD_INFORMATION` value at the same time as the corresponding `$FILE_NAME` value
+- `STANDARD_INFORMATION` value after the corresponding `$FILE_NAME` value
 
 Aggregate counts of which rules were triggered are also tracked.
 
@@ -230,7 +230,7 @@ All of these measurements allow an investigator to examine the MFT artifact clos
 
 MFTGuard utilizes the uthash library to create a hash table and subsequently to manage records identified by the rule set as candidates for further investigation. Candidates are keyed by their MFT record number so as to allow direct association between the stored candidate and its original MFT record.
 
-Candidate collection occurs after rule evaluation. When a record satisfies `rules_should_report()`, MFTGuard creates a deep copy of all relevant record metadata and stores it in the hash table. The following information is preserved in each candidate for further reporting:
+Candidate collection occurs after rule evaluation. When a record satisfies `rules_should_report()`, MFTGuard creates a deep copy of all relevant record metadata and stores it in the hash table. The following information is preserved in each `candidate` struct for further reporting:
 
 - MFT record number
 - Rule flags
@@ -238,7 +238,7 @@ Candidate collection occurs after rule evaluation. When a record satisfies `rule
 - All extracted `$FILE_NAME` attributes
 - Associated filename data and metadata
 
-The candidate is deep-copied rather than retaining pointers to temporary metadata since the same metadata structures are re-used as each record is processed. An independent copy of each flagged record also allows better MFT-wide analysis.
+The candidate is deep-copied from the `record_metadata` struct rather than retaining pointers to temporary metadata since the same metadata structures are re-used as each record is processed. An independent copy of each flagged record also allows better MFT-wide analysis.
 
 This hash table is later iterated over to produce the final JSON report. This approach allows MFTGuard to complete analysis without coupling candidate detection directly to report generation.
 
@@ -247,11 +247,11 @@ This hash table is later iterated over to produce the final JSON report. This ap
 The structured JSON report contains both aggregate MFT statistics and detailed information for records identified as candidates. For report generation, the cJSON library was used. As far as organization, the report is split into two main sections:
 
 - Overview = aggregate information describing the MFT and the analysis performed, including record status counts, rule counts, `$FILE_NAME` statistics, SI/FN timestamp relationships, and timestamp delta statistics.
-- Candidates = a massive array containing detailed metadata for each record that satisfied the reporting criteria, including its record number, triggered rule flags, `$STANDARD_INFORMATION` data, and all extracted `$FILE_NAME` attributes.
+- Candidates = an array containing detailed metadata for each record that satisfied the reporting criteria, including its record number, triggered rule flags, `$STANDARD_INFORMATION` data, and extracted `$FILE_NAME` data from each instance in the records attribute list.
 
 The overview and statistical data are generated first. Candidate records are then written incrementally as the candidate hash table is traversed. Rather than constructing a potentially enormous JSON array in memory, each candidate is serialized and written to the report individually.
 
-This streaming approach is particularly important when processing large MFT artifacts. In testing, MFTGuard encountered more than 180,000 candidates, making it impractical to construct the entire candidate section as an in-memory cJSON object. Streaming the candidate output keeps memory consumption substantially lower while still producing a single valid JSON document.
+This streaming approach is particularly important when processing large MFT artifacts. While testing with an individual MFT, MFTGuard encountered more than 180,000 candidates, making it impractical to construct the entire candidate section as an in-memory cJSON object. Streaming the candidate output keeps memory consumption substantially lower while still producing a single valid JSON document.
 
 Here is a simplified representation of the report structure:
 
@@ -302,7 +302,7 @@ Here is a simplified representation of the report structure:
       "file_names": [
         {
           "parent_directory": 3096224743817227,
-          "filename_namespace": "...",
+          "filename_namespace": 1,
           "filename": "filename.exe"
         }
       ]
@@ -317,9 +317,9 @@ The resulting report is designed to be easy for further scripts and tools to cor
 
 ### Performance
 
-MFTGuard is designed to process large MFT artifacts efficiently while performing validation, attribute parsing, statistical analysis, rule evaluation, candidate collection, and structured report generation. For example: testing was performed using an MFT artifact obtained from a virtual machine containing 826,880 records. Both a clean sample and a test sample containing intentionally modified timestamps were processed.
+MFTGuard is designed to process large MFT artifacts efficiently while performing validation, attribute parsing, statistical analysis, rule evaluation, candidate collection, and structured report generation. For example: testing was performed using an MFT artifact obtained from a Windows 11 virtual machine containing 826,880 records. Both a clean sample and a test sample containing intentionally modified timestamps were processed.
 
-The full analysis, including the JSON report generation, completed in approximately 10 seconds for a single 826,880-record artifact. This benchmark includes the complete workflow from execution.
+The full analysis, including the JSON report generation, completed in approximately 10 seconds for this single 826,880-record artifact. This benchmark includes the complete workflow.
 
 The modified sample was created for controlled testing and is not intended to represent every possible real-world timestomping technique. With that being said, this benchmark demonstrates that MFTGuard can analyze hundreds of thousands of MFT records and produce a detailed forensic report without requiring a separate processing stage for each component.
 
@@ -341,24 +341,24 @@ Testing against a clean MFT produced the following results initially:
 | Zeroed timestamps | 6.00% |
 | Identical timestamps | 11.67% |
 
-Attempted candidate scoring also fell short. While testing a score based on clustered timestamps: 29.96% of all candidates (134,177) were in a cluster of 10,000 or more. Analyzing the parent directory of candidates produced a similar result, although slightly more promising: 978 candidates did not share a parent directory with any other candidate. Overall, the candidate scoring system was not deemed useful and also had a very costly toll when it came to resources and time.
+Candidate scoring was another attempt to decrease the false-positive rate: performing analysis that required iteration of the hash table with populated candidates. All attempted candidate scoring fell short. While testing a score based on clustered timestamps: 29.96% of all candidates (134,177) were in a cluster of 10,000 or more. Analyzing the parent directory of candidates produced a similar result, although slightly more promising: 978 candidates did not share a parent directory with any other candidate. Overall, the candidate scoring system was not particularly useful and also had a very costly toll when it came to resources and time (both parent directory and timestamp cluster evaluation required iteration).
 
 This changed the direction of the project. Instead of trying to detect timestomping, the tool was redesigned around forensic triage and evidence correlation.
 
 ### Correlation Is Essential
 
-The most promising use of MFTGuard came from treating the output as a starting point for investigation rather than a one-stop-shop. The resulting report provides detailed candidate records, timestamp relationships, rule flags, filenames, and aggregate statistics that can be correlated with independent forensic artifacts. Sources such as the USN Journal, $LogFile, Prefetch, Amcache, ShimCache, Windows event logs, Sysmon, LNK files, Jump Lists, and application-specific logs can provide additional context about what happened around the timestamps identified by MFTGuard.
+The most promising use of MFTGuard is treating the output as a starting point for investigation rather than a standalone detection system. The resulting report provides detailed data that can be correlated with independent forensic artifacts. Sources such as the USN Journal, $LogFile, Prefetch, Amcache, ShimCache, Windows event logs, Sysmon, LNK files, Jump Lists, and application-specific logs can provide additional context about what happened around the timestamps identified by MFTGuard.
 
 The final design philosophy of the project is:
 > MFTGuard points the way, independent forensic artifacts reveal what actually happened
 
-The biggest lesson from the project was therefore not how to create a more complicated detection rule, it was learning where the available evidence stops being sufficient, and designing the tool to work effectively within that limitation.
+The biggest lesson from the project was therefore not how to create a more complicated detection rule set, it was learning where the available evidence stops being sufficient, and designing the tool to work effectively within that limitation.
 
 ## Disclaimer
 
-MFTGuard is intended to assists with the analysis of NTFS timestamp behavior. Its output should not be interpreted as definitive proof that timestomping or general timestamp manipulation occurred.
+MFTGuard is intended to assist with the analysis of NTFS timestamp behavior. Its output should not be interpreted as definitive proof that timestomping or general timestamp manipulation occurred.
 
-MFTGuard analyzes information contained within the NTFS $MFT and may produce false positives due to legitimate filesystem behavior and the inherent complexity of NTFS metadata. Findings should be validated and correlated with independent forensic artifacts and other available evidence before drawing conclusions.
+MFTGuard analyzes information contained within the NTFS Master File Table. It may produce false positives due to legitimate filesystem behavior and the inherent complexity of NTFS metadata. Findings should be validated and correlated with independent forensic artifacts and other available evidence before drawing conclusions.
 
 This project is provided for educational, research, and authorized forensic analysis purposes. Only analyze systems, storage media, and forensic images for which you have appropriate authorization. I will make no guarantees regarding the completeness, accuracy, or suitability of MFTGuard for any particular forensic investigation. The tool should not replace established forensic procedures, independent evidence validation, or professional forensic judgment.
 
