@@ -16,17 +16,17 @@
  */
 static bool parse_sector_size(const char *arg, uint32_t *sector_size);
 
-bool parse_args(int argc, char *argv[], options *options)
+bool parse_args(int argc, char *argv[], options *cli_options)
 {
-    if (options == NULL)
+    if (cli_options == NULL)
     {
         return false;
     }
 
-    options->mft_path = NULL;
-    options->output_path = DEFAULT_OUTPUT_PATH;
-    options->sector_size = DEFAULT_SECTOR_SIZE;
-    options->help = false;
+    cli_options->mft_path = NULL;
+    cli_options->output_path = DEFAULT_OUTPUT_PATH;
+    cli_options->sector_size = DEFAULT_SECTOR_SIZE;
+    cli_options->help = false;
 
     for (int i = 1; i < argc; i++)
     {
@@ -34,18 +34,18 @@ bool parse_args(int argc, char *argv[], options *options)
 
         if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0)
         {
-            options->help = true;
+            cli_options->help = true;
             return true;
         }
 
-        if (strcmp(arg, "-f" == 0) || strcmp(arg, "--file" == 0))
+        if (strcmp(arg, "-f") == 0 || strcmp(arg, "--file") == 0)
         {
             if (i + 1 >= argc)
             {
                 return false;
             }
 
-            options->mft_path = *argv[++i];
+            cli_options->mft_path = argv[++i];
             continue;
         }
 
@@ -56,7 +56,7 @@ bool parse_args(int argc, char *argv[], options *options)
                 return false;
             }
 
-            if (!parse_sector_size(argv[++i], &options->sector_size))
+            if (!parse_sector_size(argv[++i], &cli_options->sector_size))
             {
                 return false;
             }
@@ -71,7 +71,7 @@ bool parse_args(int argc, char *argv[], options *options)
                 return false;
             }
 
-            options->output_path = *argv[++i];
+            cli_options->output_path = argv[++i];
 
             continue;
         }
@@ -80,7 +80,7 @@ bool parse_args(int argc, char *argv[], options *options)
         return false;
     }
 
-    if (options->mft_path == NULL)
+    if (cli_options->mft_path == NULL)
     {
         return false;
     }

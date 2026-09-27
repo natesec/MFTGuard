@@ -5,39 +5,33 @@
 #include "report.h"
 #include "statistics.h"
 #include "candidate.h"
+#include "cli.h"
 
 int main(int argc, char *argv[])
 {
-    if (argc < 3)
-    {
-        fprintf(stderr, ERROR_MARKER "USAGE: %s <file> <sector_size>\n", argv[0]);
-        return 1;
-    }
-
     mft_file mft;
     mft_record record = {0};
 
     printf(MESSAGE_MARKER "Opening $MFT file...\n");
 
-    const char *mft_path = argv[1];
+    options cli_options;
 
-    char *endptr = NULL;
-    
-    unsigned long sector_size_value = strtoul(argv[2], &endptr, 10);
-
-    if (*argv[2] == '\0' || *endptr != '\0' || sector_size_value > UINT32_MAX)
+    if (!parse_args(argc, argv, &cli_options))
     {
-        fprintf(stderr, ERROR_MARKER "invalid sector size\n");
+        fprintf(stderr, ERROR_MARKER "failed to parse cli arguments\n");
+        print_help(argv[0]);
         return 1;
     }
 
-    uint32_t sector_size = (uint32_t)sector_size_value;
-
-    if (sector_size == 0)
+    if (cli_options.help)
     {
-        fprintf(stderr, ERROR_MARKER "sector size cannot be zero");
-        return 1;
+        print_help(argv[0]);
+        return  0;
     }
+
+    const char *mft_path = cli_options.mft_path;
+    const char *output_path = cli_options.output_path;
+    uint32_t sector_size = cli_options.sector_size;
 
     if (!mft_open(&mft, mft_path))
     {
@@ -128,7 +122,7 @@ int main(int argc, char *argv[])
     
     printf(MESSAGE_MARKER "Generating JSON report\n");
 
-    if (!report_write(&report, candidates, "mftguard_report.json"))
+    if (!report_write(&report, candidates, output_path))
     {
         fprintf(stderr, ERROR_MARKER "JSON: failed to write report\n");
         report_free(&report);
