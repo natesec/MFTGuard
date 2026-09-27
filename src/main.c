@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <signal.h>
+
 #include "mft.h"
 #include "utils.h"
 #include "rules.h"
@@ -7,8 +9,19 @@
 #include "candidate.h"
 #include "cli.h"
 
+/**
+ * @brief Handle ctrl+c interrupts
+ * @param signal Integer atomic signal
+ * @note Interrupt used as extern in report.h/c in report_write()
+ */
+static void handle_interrupt(int signal);
+
+volatile sig_atomic_t interrupted = 0;
+
 int main(int argc, char *argv[])
 {
+    signal(SIGINT, handle_interrupt);
+
     mft_file mft;
     mft_record record = {0};
 
@@ -51,6 +64,12 @@ int main(int argc, char *argv[])
 
     while (mft.record_number < mft.record_count)
     {
+        if (interrupted)
+        {
+            printf(ERROR_MARKER "Signal interrupt...\n");
+            break;
+        }
+
         if (!mft_read_record(&mft))
         {
             statistics_collect(&stats, NULL, MFT_RECORD_SKIPPED, RULE_NONE, false);
@@ -100,6 +119,14 @@ int main(int argc, char *argv[])
         mft.record_number++;
     }
 
+    if (interrupted)
+    {
+        candidate_free_all(&candidates);
+        mft_close(&mft);
+        printf(SUCCESS_MARKER "MFT closed successfully\n");
+        return 0;
+    }
+
     report report = {0};
 
     if (!report_initialize(&report))
@@ -131,7 +158,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    printf(SUCCESS_MARKER "JSON report complete\n");
+    if (!interrupted)
+    {
+        printf(SUCCESS_MARKER "JSON report complete\n");
+    }
 
     report_free(&report);
     candidate_free_all(&candidates);
@@ -141,4 +171,10 @@ int main(int argc, char *argv[])
     printf(SUCCESS_MARKER "MFT closed successfully\n");
 
     return 0;
+}
+
+static void handle_interrupt(int signal)
+{
+    (void)signal;
+    interrupted = 1;
 }

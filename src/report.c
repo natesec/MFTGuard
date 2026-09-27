@@ -282,6 +282,12 @@ bool report_write(const report *report, const candidate *candidates, const char 
 
         HASH_ITER(hh, hash_candidates, current, tmp)
         {
+            if (interrupted)
+            {
+                printf(ERROR_MARKER "WARNING: signal interrupt, report did not complete\n");
+                break;
+            }
+
             if (!first_candidate)
             {
                 if (fputs(",\n", output) == EOF)

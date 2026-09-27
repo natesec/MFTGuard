@@ -3,11 +3,14 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include "mft.h"
 #include "statistics.h"
 #include "cJSON.h"
 #include "candidate.h"
+
+extern volatile sig_atomic_t interrupted;
 
 /**
  * @brief Represents a cJSON root object.
