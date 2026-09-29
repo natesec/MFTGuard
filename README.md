@@ -77,12 +77,17 @@ The resulting $MFT file can be provided to MFTGuard for analysis.
 
 You can use MFTGuard to analyze a raw binary $MFT file with:
 ```
-MFTGuard.exe <$mft> <sector-size>
+MFTGuard.exe -f <$mft> [-s <sector-size> -o <output-file>]
 ```
+Or:
+```
+MFTGuard.exe --file <$mft> [--sector-size <sector_size> --output <output-file>]
+```
+You can use the `-h` or `--help` options to display the usage menu with examples.
 
-The default Windows sector size is 512. This will be suitable for most Windows machines.
+The default Windows sector size is 512. This will be suitable for most Windows machines
 
-After a successful scan, a JSON report file is created with the filename `mftguard_report.json`.
+After a successful scan, a JSON report file is created with the filename `mftguard_report.json` by default, or whatever filename is specified.
 
 ## Key Features
 
