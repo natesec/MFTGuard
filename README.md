@@ -8,7 +8,7 @@ MFTGuard is a C-based DFIR tool designed to identify NTFS Master File Table reco
 
 The goal of this project is not to automatically declare a file as a definite result of timestomping. Instead, MFTGuard is an investigative triage tool: it reduces the number of MFT records an investigator needs to examine and provides structured evidence that can be correlated with independent forensic artifacts. This not only saves time and resources, it also allows investigators to perform much deeper analysis of MFT records that are sure to require it.
 
-![demo](assets/mftguard-demo.gif)
+![demo](assets/mftguard-demo2.gif)
 
 ## Table of Contents
 
@@ -81,7 +81,7 @@ MFTGuard.exe -f <$mft> [-s <sector-size> -o <output-file>]
 ```
 Or:
 ```
-MFTGuard.exe --file <$mft> [--sector-size <sector_size> --output <output-file>]
+MFTGuard.exe --file <$mft> [--sector-size <sector-size> --output <output-file>]
 ```
 You can use the `-h` or `--help` options to display the usage menu with examples.
 

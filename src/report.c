@@ -284,7 +284,7 @@ bool report_write(const report *report, const candidate *candidates, const char 
         {
             if (interrupted)
             {
-                printf(ERROR_MARKER "WARNING: signal interrupt, report did not complete\n");
+                fprintf(stderr, ERROR_MARKER "WARNING: signal interrupt, report did not complete\n");
                 break;
             }
 

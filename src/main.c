@@ -22,6 +22,16 @@ int main(int argc, char *argv[])
 {
     signal(SIGINT, handle_interrupt);
 
+    puts(
+    "\033[31m"
+    "    __  _____________________                     __ \n"
+    "   /  |/  / ____/_  __/ ____/_  ______ __________/ / \n"
+    "  / /|_/ / /_    / / / / __/ / / / __ `/ ___/ __  /  \n"
+    " / /  / / __/   / / / /_/ / /_/ / /_/ / /  / /_/ /   \n"
+    "/_/  /_/_/     /_/  \\____/\\__,_/\\__,_/_/   \\__,_/"
+    "\033[0m\n"
+    );
+
     mft_file mft;
     mft_record record = {0};
 
@@ -66,7 +76,7 @@ int main(int argc, char *argv[])
     {
         if (interrupted)
         {
-            printf(ERROR_MARKER "Signal interrupt...\n");
+            fprintf(stderr, "\n" ERROR_MARKER "Signal interrupt...\n");
             break;
         }
 
@@ -117,7 +127,29 @@ int main(int argc, char *argv[])
         }
 
         mft.record_number++;
+
+        if (mft.record_number % 1000 == 0)
+        {
+            double progress = ((double)mft.record_number / (double)mft.record_count) * 100;
+
+            printf(
+                "\r" MESSAGE_MARKER "Processing $MFT: %.1f%% | Records: %llu / %llu | Candidates: %llu",
+                progress,
+                (unsigned long long)mft.record_number,
+                (unsigned long long)mft.record_count,
+                (unsigned long long)stats.records_flagged
+            );
+
+            fflush(stdout);
+        }
     }
+
+    printf(
+        "\r" SUCCESS_MARKER "Processing $MFT: 100.0%% | Records: %llu / %llu | Candidates: %llu\n",
+        (unsigned long long)mft.record_number,
+        (unsigned long long)mft.record_count,
+        (unsigned long long)stats.records_flagged
+    );
 
     if (interrupted)
     {
@@ -147,7 +179,7 @@ int main(int argc, char *argv[])
     }
 
     
-    printf(MESSAGE_MARKER "Generating JSON report\n");
+    printf(MESSAGE_MARKER "Generating JSON report...\n");
 
     if (!report_write(&report, candidates, output_path))
     {
