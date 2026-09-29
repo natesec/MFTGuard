@@ -144,13 +144,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf(
-        "\r" SUCCESS_MARKER "Processing $MFT: 100.0%% | Records: %llu / %llu | Candidates: %llu\n",
-        (unsigned long long)mft.record_number,
-        (unsigned long long)mft.record_count,
-        (unsigned long long)stats.records_flagged
-    );
-
     if (interrupted)
     {
         candidate_free_all(&candidates);
@@ -158,6 +151,13 @@ int main(int argc, char *argv[])
         printf(SUCCESS_MARKER "MFT closed successfully\n");
         return 0;
     }
+
+    printf(
+        "\r" SUCCESS_MARKER "Processing $MFT: 100.0%% | Records: %llu / %llu | Candidates: %llu\n",
+        (unsigned long long)mft.record_number,
+        (unsigned long long)mft.record_count,
+        (unsigned long long)stats.records_flagged
+    );
 
     report report = {0};
 
