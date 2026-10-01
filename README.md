@@ -35,7 +35,7 @@ At the moment, only Windows and Linux environments are supported.
 
 The following are required to build MFTGuard from source:
 - C compiler with C11 support
-- CMake
+- CMake (tested with version 4.4.2)
 
 CMake is used to simplify the process of configuring and generating build files.
 
