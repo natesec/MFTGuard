@@ -41,7 +41,7 @@ uint32_t read_u32_le(const uint8_t *buffer);
 uint64_t read_u64_le(const uint8_t *buffer);
 
 /**
- * @brief Convert a utf16le WCHAR string to UTF-8.
+ * @brief Convert a utf16le WCHAR string to UTF-8 using either Windows or iconv header.
  * @param input Pointer to the UTF16-LE input string.
  * @param length Length of the input string.
  * @return Pointer to the converted UTF-8 string.

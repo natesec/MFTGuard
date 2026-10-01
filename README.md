@@ -4,7 +4,7 @@
 
 [T1070.006 - Indicator Removal: Timestomp](https://attack.mitre.org/techniques/T1070/006/)
 
-MFTGuard is a C-based DFIR tool designed to identify NTFS Master File Table records exhibiting signs of anomalous timestamp behavior.
+MFTGuard is a cross-platform, C-based DFIR tool designed to identify NTFS Master File Table records exhibiting signs of anomalous timestamp behavior.
 
 To accomplish this, MFTGuard parses an entire $MFT binary, record-by-record. As each record is being read, the various attribute timestamp values are compared against pre-defined rulesets. If a record is flagged as potentially suspect, that candidate record is stored in a hash table for further analysis. A structured JSON report is created that contains records that warrant further investigation as well as detailed statistics.
 
@@ -30,6 +30,8 @@ The goal of this project is not to automatically declare a file as a definite re
 ## Installation & Usage
 
 ### Requirements
+
+At the moment, only Windows and Linux environments are supported.
 
 The following are required to build MFTGuard from source:
 - C compiler with C11 support

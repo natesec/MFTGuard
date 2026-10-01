@@ -1,6 +1,11 @@
-#include <windows.h>
 #include <stdint.h>
 #include <stdlib.h>
+
+#ifdef _WIN32
+    #include <Windows.h>
+#elif defined(__linux__)
+    #include <iconv.h>
+#endif
 
 #include "utils.h"
 
@@ -54,10 +59,10 @@ uint64_t read_u64_le(const uint8_t *buffer)
         | ((uint64_t)buffer[7] << 56);
 }
 
-/** ANNOYING conversion necessary for JSON output */
 char *utf16le_to_utf8(const uint8_t *input, uint8_t length)
 {
-    if (input == NULL | length == 0)
+#ifdef _WIN32
+    if (input == NULL || length == 0)
     {
         return NULL;
     }
@@ -105,4 +110,42 @@ char *utf16le_to_utf8(const uint8_t *input, uint8_t length)
     output[utf8_length] = '\0';
 
     return output;
+#elif defined(__linux__)
+    iconv_t cd = iconv_open("UTF-8", "UTF-16LE");
+
+    if (cd == (iconv_t)-1)
+    {
+        return NULL;
+    }
+
+    size_t input_bytes = length;
+    size_t output_bytes = (length * 2) + 1;
+
+    char *output = malloc(output_bytes);
+
+    if (output == NULL)
+    {
+        iconv_close(cd);
+        return NULL;
+    }
+
+    char *input_ptr = (char *)input;
+    char *output_ptr = output;
+    size_t remaining_output = output_bytes - 1;
+
+    if (iconv(cd, &input_ptr, &input_bytes, &output_ptr, &remaining_output) == (size_t)-1)
+    {
+        free(output);
+        iconv_close(cd);
+        return NULL;
+    }
+
+    *output_ptr = '\0';
+
+    iconv_close(cd);
+
+    return output;
+#else
+    return NULL;
+#endif
 }
