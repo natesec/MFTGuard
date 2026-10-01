@@ -87,23 +87,23 @@ After a successful scan, a JSON report file is created with the filename `mftgua
 
 MFTGuard has a few key features that are implemented in the following order:
 
-- Raw MFT parsing:
+- **Raw MFT parsing**:
 Parses NTFS `$MFT` records directly from binary, validating record structures, signatures, boundaries, and metadata before further analysis.
-- NTFS USA fixup:
+- **NTFS USA fixup**:
 Validates USA and restores values to the tail of the specified sector size in-place before record contents are interpreted.
-- Attribute parsing:
+- **Attribute parsing**:
 Walks the attribute list for each record and extracts the `$STANDARD_INFORMATION` and `$FILE_NAME` attributes using little-endian readers.
-- Timestamp analysis:
+- **Timestamp analysis**:
 Compares corresponding `$SI` and `$FN` attribute timestamp metadata using anomaly detection rules, with results stored efficiently in the form of a bitmask.
-- Statistical analysis:
+- **Statistical analysis**:
 Collects MFT, `$FN`, timestamp relationship, and timestamp delta statistics to provide context for detection and threshold finetuning.
-- Candidate management:
+- **Candidate management**:
 Uses the `uthash` library to store flagged records by MFT record number in a hash table, preserving independent copies of record metadata.
-- Structured JSON reporting:
+- **Structured JSON reporting**:
 Uses the `cJSON` library to generate a report consisting of statistics and flagged record metadata by iterating over the candidate hash table. Candidates are serialized incrementally to limit memory usage.
-- Forensic correlation:
-Produces findings primed for forensic correlation. Independent artifacts such as the USN Journal, `$LogFile`, Prefetch, Amcache, ShimCache, Windows Event Logs are perfect to compare against. 
-- Performance:
+- **Forensic correlation**:
+Produces findings primed for forensic correlation. Independent artifacts such as the USN Journal, `$LogFile`, Prefetch, Amcache, ShimCache, Windows Event Logs are perfect to compare the JSON report findings against. 
+- **Performance**:
 In testing, MFTGuard was able to processes a Windows 11 `$MFT` file containing 826,880 records, through complete analysis and the JSON report generation, in about 10 seconds.
 
 ## Lessons Learned
