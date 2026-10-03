@@ -112,10 +112,12 @@ The detection rules triggered by each candidate is stored in the form of a bitma
 
 | Rule | Bit | Decimal |
 |------|-----|---------|
-| RULE_SI_FN_MISMATCH | 0 | 1 |
-| RULE_TIMESTAMP_ROLLBACK | 1 | 2 |
-| RULE_ZEROED_TIMESTAMP | 2 | 4 |
-| RULE_IDENTICAL_TIMESTAMPS | 3 | 8 |
+| `RULE_SI_FN_MISMATCH` | 0 | 1 |
+| `RULE_TIMESTAMP_ROLLBACK` | 1 | 2 |
+| `RULE_ZEROED_TIMESTAMP` | 2 | 4 |
+| `RULE_IDENTICAL_TIMESTAMPS` | 3 | 8 |
+
+> For example: if `rule_flags` = 5, that would be 0101 in binary. The set bits are for `RULE_SI_FN_MISMATCH` and `RULE_ZEROED_TIMESTAMP`. 
 
 ## Lessons Learned
 
