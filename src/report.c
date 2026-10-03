@@ -57,6 +57,33 @@ static bool report_add_si_fn_statistics(cJSON *overview, const statistics *stats
 static bool report_add_delta_statistics(cJSON *overview, const statistics *stats);
 
 /**
+ * @brief Add delta stats group (creation, modified, mft_modified, accessed) to a parent object.
+ * @param group Pointer to the parent cJSON object for the respective group. 
+ * @param min double minimum from stats struct.
+ * @param max double maximum from stats struct.
+ * @param count double count from stats struct.
+ * @param over_1s double over 1 sec count from stats struct.
+ * @param over_1m double over 1 minute count from stats struct.
+ * @param over_1h double over 1 hour count from stats struct.
+ * @param over_1d double over 1 day count from stats struct.
+ * @param over_1w double over 1 week count from stats struct.
+ * @param over_30d double over 30 days count from stats struct.
+ * @note Helper function for report_add_delta_statistics()
+ */
+static void report_add_delta_stats_group(
+    cJSON *group,
+    double min,
+    double max,
+    double count,
+    double over_1s,
+    double over_1m,
+    double over_1h,
+    double over_1d,
+    double over_1w,
+    double over_30d
+);
+
+/**
  * @brief Write unformatted candidate information to the JSON report file.
  * @param output Pointer to an open FILE stream where the candidate will be written.
  * @param candidate Pointer to the populated candidate struct to be written.
@@ -532,54 +559,89 @@ static bool report_add_delta_statistics(cJSON *overview, const statistics *stats
         return false;
     }
 
-    /** TODO: fix this godawful mess */
     cJSON_AddItemToObject(timestamp_deltas, "creation", creation);
     cJSON_AddItemToObject(timestamp_deltas, "modified", modified);
     cJSON_AddItemToObject(timestamp_deltas, "mft_modified", mft_modified);
     cJSON_AddItemToObject(timestamp_deltas, "accessed", accessed);
 
-    cJSON_AddItemToObject(creation, "min", cJSON_CreateNumber((double)stats->creation_delta_min));
-    cJSON_AddItemToObject(creation, "max", cJSON_CreateNumber((double)stats->creation_delta_max));
-    cJSON_AddItemToObject(creation, "count", cJSON_CreateNumber((double)stats->creation_delta_count));
-    cJSON_AddItemToObject(creation, "over_1s", cJSON_CreateNumber((double)stats->creation_delta_over_1s));
-    cJSON_AddItemToObject(creation, "over_1m", cJSON_CreateNumber((double)stats->creation_delta_over_1m));
-    cJSON_AddItemToObject(creation, "over_1h", cJSON_CreateNumber((double)stats->creation_delta_over_1h));
-    cJSON_AddItemToObject(creation, "over_1d", cJSON_CreateNumber((double)stats->creation_delta_over_1d));
-    cJSON_AddItemToObject(creation, "over_1w", cJSON_CreateNumber((double)stats->creation_delta_over_1w));
-    cJSON_AddItemToObject(creation, "over_30d", cJSON_CreateNumber((double)stats->creation_delta_over_30d));
+    report_add_delta_stats_group(
+        creation,
+        (double)stats->creation_delta_min,
+        (double)stats->creation_delta_max,
+        (double)stats->creation_delta_count,
+        (double)stats->creation_delta_over_1s,
+        (double)stats->creation_delta_over_1m,
+        (double)stats->creation_delta_over_1h,
+        (double)stats->creation_delta_over_1d,
+        (double)stats->creation_delta_over_1w,
+        (double)stats->creation_delta_over_30d
+    );
 
-    cJSON_AddItemToObject(modified, "min", cJSON_CreateNumber((double)stats->modified_delta_min));
-    cJSON_AddItemToObject(modified, "max", cJSON_CreateNumber((double)stats->modified_delta_max));
-    cJSON_AddItemToObject(modified, "count", cJSON_CreateNumber((double)stats->modified_delta_count));
-    cJSON_AddItemToObject(modified, "over_1s", cJSON_CreateNumber((double)stats->modified_delta_over_1s));
-    cJSON_AddItemToObject(modified, "over_1m", cJSON_CreateNumber((double)stats->modified_delta_over_1m));
-    cJSON_AddItemToObject(modified, "over_1h", cJSON_CreateNumber((double)stats->modified_delta_over_1h));
-    cJSON_AddItemToObject(modified, "over_1d", cJSON_CreateNumber((double)stats->modified_delta_over_1d));
-    cJSON_AddItemToObject(modified, "over_1w", cJSON_CreateNumber((double)stats->modified_delta_over_1w));
-    cJSON_AddItemToObject(modified, "over_30d", cJSON_CreateNumber((double)stats->modified_delta_over_30d));
+    report_add_delta_stats_group(
+        modified,
+        (double)stats->modified_delta_min,
+        (double)stats->modified_delta_max,
+        (double)stats->modified_delta_count,
+        (double)stats->modified_delta_over_1s,
+        (double)stats->modified_delta_over_1m,
+        (double)stats->modified_delta_over_1h,
+        (double)stats->modified_delta_over_1d,
+        (double)stats->modified_delta_over_1w,
+        (double)stats->modified_delta_over_30d
+    );
 
-    cJSON_AddItemToObject(mft_modified, "min", cJSON_CreateNumber((double)stats->mft_modified_delta_min));
-    cJSON_AddItemToObject(mft_modified, "max", cJSON_CreateNumber((double)stats->mft_modified_delta_max));
-    cJSON_AddItemToObject(mft_modified, "count", cJSON_CreateNumber((double)stats->mft_modified_delta_count));
-    cJSON_AddItemToObject(mft_modified, "over_1s", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1s));
-    cJSON_AddItemToObject(mft_modified, "over_1m", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1m));
-    cJSON_AddItemToObject(mft_modified, "over_1h", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1h));
-    cJSON_AddItemToObject(mft_modified, "over_1d", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1d));
-    cJSON_AddItemToObject(mft_modified, "over_1w", cJSON_CreateNumber((double)stats->mft_modified_delta_over_1w));
-    cJSON_AddItemToObject(mft_modified, "over_30d", cJSON_CreateNumber((double)stats->mft_modified_delta_over_30d));
+    report_add_delta_stats_group(
+        mft_modified,
+        (double)stats->mft_modified_delta_min,
+        (double)stats->mft_modified_delta_max,
+        (double)stats->mft_modified_delta_count,
+        (double)stats->mft_modified_delta_over_1s,
+        (double)stats->mft_modified_delta_over_1m,
+        (double)stats->mft_modified_delta_over_1h,
+        (double)stats->mft_modified_delta_over_1d,
+        (double)stats->mft_modified_delta_over_1w,
+        (double)stats->mft_modified_delta_over_30d
+    );
 
-    cJSON_AddItemToObject(accessed, "min", cJSON_CreateNumber((double)stats->accessed_delta_min));
-    cJSON_AddItemToObject(accessed, "max", cJSON_CreateNumber((double)stats->accessed_delta_max));
-    cJSON_AddItemToObject(accessed, "count", cJSON_CreateNumber((double)stats->accessed_delta_count));
-    cJSON_AddItemToObject(accessed, "over_1s", cJSON_CreateNumber((double)stats->accessed_delta_over_1s));
-    cJSON_AddItemToObject(accessed, "over_1m", cJSON_CreateNumber((double)stats->accessed_delta_over_1m));
-    cJSON_AddItemToObject(accessed, "over_1h", cJSON_CreateNumber((double)stats->accessed_delta_over_1h));
-    cJSON_AddItemToObject(accessed, "over_1d", cJSON_CreateNumber((double)stats->accessed_delta_over_1d));
-    cJSON_AddItemToObject(accessed, "over_1w", cJSON_CreateNumber((double)stats->accessed_delta_over_1w));
-    cJSON_AddItemToObject(accessed, "over_30d", cJSON_CreateNumber((double)stats->accessed_delta_over_30d));
+    report_add_delta_stats_group(
+        accessed,
+        (double)stats->accessed_delta_min,
+        (double)stats->accessed_delta_max,
+        (double)stats->accessed_delta_count,
+        (double)stats->accessed_delta_over_1s,
+        (double)stats->accessed_delta_over_1m,
+        (double)stats->accessed_delta_over_1h,
+        (double)stats->accessed_delta_over_1d,
+        (double)stats->accessed_delta_over_1w,
+        (double)stats->accessed_delta_over_30d
+    );
 
     return true;
 }
+
+static void report_add_delta_stats_group(
+    cJSON *group,
+    double min,
+    double max,
+    double count,
+    double over_1s,
+    double over_1m,
+    double over_1h,
+    double over_1d,
+    double over_1w,
+    double over_30d)
+{
+    cJSON_AddItemToObject(group, "min", cJSON_CreateNumber(min));
+    cJSON_AddItemToObject(group, "max", cJSON_CreateNumber(max));
+    cJSON_AddItemToObject(group, "count", cJSON_CreateNumber(count));
+    cJSON_AddItemToObject(group, "over_1s", cJSON_CreateNumber(over_1s));
+    cJSON_AddItemToObject(group, "over_1m", cJSON_CreateNumber(over_1m));
+    cJSON_AddItemToObject(group, "over_1h", cJSON_CreateNumber(over_1h));
+    cJSON_AddItemToObject(group, "over_1d", cJSON_CreateNumber(over_1d));
+    cJSON_AddItemToObject(group, "over_1w", cJSON_CreateNumber(over_1w));
+    cJSON_AddItemToObject(group, "over_30d", cJSON_CreateNumber(over_30d));
+}
+
 
 static bool report_write_candidate(FILE *output, const candidate *candidate)
 {
