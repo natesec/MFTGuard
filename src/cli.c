@@ -123,11 +123,15 @@ static bool parse_sector_size(const char *arg, uint32_t *sector_size)
     unsigned long value = strtoul(arg, &endptr, 10);
 
 
-    if (errno == ERANGE ||
-        endptr == arg ||
-        *endptr != '\0' ||
-        value == 0 ||
-        value > UINT32_MAX)
+    if (errno == ERANGE || endptr == arg || *endptr != '\0')
+    {
+        return false;
+    }
+
+    if (value != 512 &&
+        value != 1024 &&
+        value != 2048 &&
+        value != 4096)
     {
         return false;
     }
