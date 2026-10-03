@@ -108,6 +108,15 @@ Produces findings primed for forensic correlation. Independent artifacts such as
 - **Performance**:
 In testing, MFTGuard was able to processes a Windows 11 `$MFT` file containing 826,880 records, through complete analysis and the JSON report generation, in about 10 seconds.
 
+The detection rules triggered by each candidate is stored in the form of a bitmask. Each rule is assigned a unique bit position depending on its place in the enum, allowing multiple detections to be represented by a single integer. In the JSON report, this bitmask can be accessed for an object in the candidate array under the field `rule_flags`, which can be decoded using the following table:
+
+| Rule | Bit | Decimal |
+|------|-----|---------|
+| RULE_SI_FN_MISMATCH | 0 | 1 |
+| RULE_TIMESTAMP_ROLLBACK | 1 | 2 |
+| RULE_ZEROED_TIMESTAMP | 2 | 4 |
+| RULE_IDENTICAL_TIMESTAMPS | 3 | 8 |
+
 ## Lessons Learned
 
 MFTGuard began with a much more ambitious goal: develop a timestomping detection tool that could identify suspicious timestamp manipulation with a very low false-positive rate using nothing but the $MFT binary by itself. As development progressed and the tool was tested against real MFT data, this proved to be unrealistic.
